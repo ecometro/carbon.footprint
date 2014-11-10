@@ -25,6 +25,9 @@ function hce_theme_setup() {
 	/* Load JavaScript files on the 'wp_enqueue_scripts' action hook. */
 	add_action( 'wp_enqueue_scripts', 'hce_load_scripts' );
 
+	/* Load scripts for IE compatibility */
+	add_action('wp_head','hce_ie_scripts');
+
 	// Custom post types
 	add_action( 'init', 'hce_create_post_type', 0 );
 
@@ -72,16 +75,31 @@ function hce_register_menus() {
 
 // load js scripts to avoid conflicts
 function hce_load_scripts() {
+	wp_register_style( 'bootstrap-css', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css' );
+	wp_register_style( 'hce-css', get_stylesheet_uri(), array('bootstrap-css') );
+	wp_enqueue_style('hce-css');
 	wp_enqueue_script('jquery');
 //	wp_enqueue_script(
-//		'bootstrap.min',
+//		'bootstrap-js',
 //		get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js',
 //		array( 'jquery' ),
-//		'2.3.2',
+//		'3.3.0',
 //		FALSE
 //	);
 
 } // end load js scripts to avoid conflicts
+
+// load scripts for IE compatibility
+function hce_ie_scripts() {
+	echo "
+	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	<!--[if lt IE 9]>
+	<script src='https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js'></script>
+	<script src='https://oss.maxcdn.com/respond/1.4.2/respond.min.js'></script>
+	<![endif]-->
+	";
+}
 
 // register post types
 function hce_create_post_type() {
