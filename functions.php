@@ -140,4 +140,154 @@ function hce_remove_dashboard_item() {
 	remove_menu_page('edit.php');	
 }
 
+// display HCE form to evaluate a project
+function hce_eval_project_form() {
+
+	// form action URL
+	$action = get_permalink();
+
+	// fields
+	$fields = array(
+		array(
+			'label' => 'Nombre del proyecto',
+			'name' => 'name',
+			'required' => 1,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Calle',
+			'name' => 'address',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Localidad',
+			'name' => 'city',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Provincia',
+			'name' => 'state',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Código postal',
+			'name' => 'cp',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Uso',
+			'name' => 'use',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Superficie construida',
+			'name' => 'built-area',
+			'required' => 1,
+			'unit' => 'm2',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Superficie útil',
+			'name' => 'useful-area',
+			'required' => 1,
+			'unit' => 'm2',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Superficie computable',
+			'name' => 'adjusted-area',
+			'required' => 1,
+			'unit' => 'm2',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Número de usuarios',
+			'name' => 'users',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Presupuesto',
+			'name' => 'budget',
+			'required' => 0,
+			'unit' => '€',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Calificación energética',
+			'name' => 'energy-label',
+			'required' => 0,
+			'unit' => '',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Consumo energético anual',
+			'name' => 'energy-consumption',
+			'required' => 0,
+			'unit' => 'kWh/m2 año',
+			'comment' => '',
+		),
+		array(
+			'label' => 'Emisión anual de CO2',
+			'name' => 'co2-emission',
+			'required' => 0,
+			'unit' => 'Kg CO2/m2 año',
+			'comment' => '',
+		),
+	);
+	$fields_out = "";
+	foreach ( $fields as $field ) {
+		if ( $field['required'] == 1 ) { $req_class = " req"; } else { $req_class = ""; }
+		if ( $field['unit'] != '' ) {
+			$feedback_class = " has-feedback";
+			$feedback = "<span class='form-control-feedback'>".$field['unit']."</span>";
+		} else { $feedback_class = ""; $feedback = ""; }
+		if ( $field['comment'] != '' ) {
+    			$help = "<p class='help-block col-sm-4'><small>".$field['comment']."</small></p>";
+		} else { $help = ""; }
+		$fields_out .= "
+		<fieldset class='form-group".$feedback_class."'>
+			<label for='hce-eval-form-".$field['name']."' class='col-sm-3 control-label'>".$field['label']."</label>
+			<div class='col-sm-5'>
+				<input class='form-control".$req_class."' type='text' value='' name='hce-eval-form-".$field['name']."' />
+				".$feedback."
+			</div>
+			".$help."
+		</fieldset>
+		";
+	}
+
+	$form_out = "
+	<form class='row' id='hce-eval-form' method='post' action='" .$action. "' enctype='multipart/form-data'>
+		<div class='form-horizontal col-md-12'>
+		".$fields_out."
+		<fieldset class='form-group'>
+			<label for='hce-eval-form-desc' class='col-sm-3 control-label'>Descripción del proyecto</label>
+			<div class='col-sm-5'>
+				<textarea class='form-control' rows='3' name='hce-eval-form-desc'></textarea>
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<div class='col-sm-offset-3 col-sm-5'>
+				<input class='btn btn-default' type='submit' value='Enviar' name='hce-eval-form-submit' />
+    			</div>
+		</fieldset>
+		</div>
+	</form>
+	";
+	echo $form_out;
+} // end display HCE form to evaluate a project
+
 ?>

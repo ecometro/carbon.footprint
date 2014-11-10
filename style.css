@@ -23,3 +23,9 @@ body { padding-top: 70px; }
 	padding-top: 9px;
 	border-top: 1px solid #EEE;
 }
+
+/* evaluation project form */
+.form-control-feedback {
+	right: 20px !important;
+	width: auto;
+}
