@@ -44,8 +44,8 @@ wp_head(); ?>
 <body <?php body_class(); ?>>
 
 <nav id="pre-navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
-	<div class="container">
-		<div class="navbar-header quincem-smooth">
+	<div class="container-fluid">
+		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#hce-pre-navbar-collapse">
 				<span class="sr-only">Mostrar/Ocultar menú</span>
 				<span class="icon-bar"></span>
@@ -71,3 +71,4 @@ wp_head(); ?>
 		</div>
 	</div>
 </nav>
+<div class="container-fluid">

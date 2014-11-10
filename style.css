@@ -17,3 +17,9 @@ Tags: HTML5, CSS3
 	http://www.opensource.org/licenses/gpl-license.php
 
 */
+body { padding-top: 70px; }
+.epi-content {
+	margin: 20px 0 40px;
+	padding-top: 9px;
+	border-top: 1px solid #EEE;
+}
