@@ -42,3 +42,32 @@ wp_head(); ?>
 
 <?php // better to use body tag as the main container ?>
 <body <?php body_class(); ?>>
+
+<nav id="pre-navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header quincem-smooth">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#hce-pre-navbar-collapse">
+				<span class="sr-only">Mostrar/Ocultar menú</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/hce-logo.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
+		</div>
+		<div class="collapse navbar-collapse" id="hce-pre-navbar-collapse">
+			<?php $location = "header-menu";
+			if ( has_nav_menu( $location ) ) {
+				$args = array(
+					'theme_location'  => $location,
+					'container' => false,
+					'menu_id' => 'navbar-main',
+					'menu_class' => 'nav navbar-nav'
+				);
+				wp_nav_menu( $args );
+			} ?>
+			<ul id="navbar-third" class="nav navbar-nav navbar-right">
+				<li class="navbar-socialb"><a href="#">Sesion</a></li>
+			</ul>
+		</div>
+	</div>
+</nav>

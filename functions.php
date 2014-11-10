@@ -66,8 +66,8 @@ function hce_register_menus() {
         if ( function_exists( 'register_nav_menus' ) ) {
                 register_nav_menus(
                 array(
-                        'main-menu' => 'Menú principal',
-                        'secondary-menu' => 'Menú secundario',
+                        'header-menu' => 'Menú de cabecera',
+                        'footer-menu' => 'Menú del pie de página',
                 )
                 );
         }
