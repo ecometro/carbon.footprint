@@ -190,17 +190,17 @@ function hce_project_insert_basic_data($title,$content,$cfields = array(),$locat
 // display HCE form to evaluate a project
 function hce_form($step,$project_id = 0 ) {
 
-	$wrong_step = 4;
+	$last_step = 3;
 	$location = get_permalink();
 	$user_ID = get_current_user_id();
 
-	if ( $step >= $wrong_step ) {
+	if ( $step >> $last_step ) {
 		wp_redirect( $location );
 		exit;
 	}
 
 	// prev and next steps links
-	if ( $step == $wrong_step - 1 ) { $action_next = ""; } else {
+	if ( $step == $last_step ) { $action_next = ""; } else {
 		$next_step = $step + 1;
 		$action_next = $location."?step=".$next_step;
 		if ( $project_id != 0 ) { $action_next .= "&project_id=".$project_id; }
@@ -209,7 +209,7 @@ function hce_form($step,$project_id = 0 ) {
 		$prev_step = $step - 1;
 		$action_prev = $location."?step=".$prev_step;
 		if ( $project_id != 0 ) { $action_prev .= "&project_id=".$project_id; }
-		$prev_step_out = "<span class='glyphicon glyphicon-chevron-left'></span> <a href='".$action_prev."' class='btn btn-default'>Paso ".$prev_step."</a>";
+		$prev_step_out = "<span class='glyphicon glyphicon-chevron-left'></span> <a href='".$action_prev."' class='btn btn-default'>Volver al paso ".$prev_step."</a>";
 	} else { $action_prev = ""; $prev_step_out = ""; }
 
 	// WHAT TO SHOW
@@ -230,6 +230,7 @@ function hce_form($step,$project_id = 0 ) {
 				exit;
 			} // end if project exists and user is the author
 
+
 		} else { // if project_id is not defined
 			$value['name'] = '';
 			$value_desc = '';
@@ -240,6 +241,7 @@ function hce_form($step,$project_id = 0 ) {
 		} // end if project_id is defined
 
 		$enctype_out = "";
+		$submit_out = 'Guardar e ir al paso '.$next_step;
 		// fields
 		$fields = array(
 			array(
@@ -390,6 +392,7 @@ function hce_form($step,$project_id = 0 ) {
 	// in step 2
 	elseif ( $step == 2 ) {
 		$enctype_out = " enctype='multipart/form-data'";
+		$submit_out = 'Subir archivo e ir al paso '.$next_step;
 		$fields_out = "
 		<fieldset class='form-group'>
 			<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo presupuesto</label>
@@ -400,16 +403,73 @@ function hce_form($step,$project_id = 0 ) {
 			<p class='col-sm-4 help-block'><small>Aquí algunas instrucciones que cuenten cosas...</small></p>
 		</fieldset>
 		";
-	} // end if step 2
+	}
+	// in step 3
+	elseif ( $step == 3 ) {
+		$enctype_out = "";
+		$submit_out = "Calcular emisiones";
+		$distances_out = "
+			<option value=''>Distancia</option>
+			<option value='200'>Local (200 km)</option>
+			<option value='800'>Nacional (800 km)</option>
+			<option value='2500'>Europea (2500 km)</option>
+			<option value='8000'>Internacional (8000 km)</option>
+		"; 
+		$types_out = "
+			<option value=''>Medio</option>
+			<option value=''>Barco de carga</option>
+			<option value=''>Tren de carga</option>
+			<option value=''>Transporte por carretera</option>
+		";
+		$fields_out = "
+		<fieldset class='form-group'>
+			<label for='hce-form-step".$step."-desc' class='col-sm-3 control-label'>Tipo material</label>
+			<div class='col-sm-2'>
+				<select class='form-control' name='hce-form-step".$step."-transport-distance'>".$distances_out."</select>
+			</div>
+			<div class='col-sm-3'>
+				<select class='form-control' name='hce-form-step".$step."-transport-type'>".$types_out."</select>
+			</div>
+		</fieldset>
+		";
+	}
 	// END WHAT TO SHOW
+
+	// steps nav menu
+	$btns = array(
+		array(
+			'step' => 1,
+			'status' => " btn-default",
+			'text' => "Proyecto",
+			'after' => " <span class='glyphicon glyphicon-chevron-right'></span> "
+		),
+		array(
+			'step' => 2,
+			'status' => " btn-default",
+			'text' => "Materiales",
+			'after' => " <span class='glyphicon glyphicon-chevron-right'></span> "
+		),
+		array(
+			'step' => 3,
+			'status' => " btn-default",
+			'text' => "Transporte",
+			'after' => ""
+		),
+	);
+	$nav_btns_out = "<label>Pasos:</label> ";
+	reset($btns);
+	foreach ( $btns as $btn ) {
+		if ( $step == $btn['step'] ) { $btn['status'] = " btn-primary"; }
+		$nav_btns_out .= "<button type='button' class='btn btn-sm".$btn['status']."' disabled='disabled'>".$btn['step'].". ".$btn['text']."</button>".$btn['after'];	
+	}
 
 	// form output
 	$form_out = "
 	<form class='row' id='hce-form-step".$step."' method='post' action='" .$action_next. "'" .$enctype_out. ">
 		<div class='form-horizontal col-md-12'>
 		<fieldset class='form-group'>
-			<div class='col-sm-offset-3 col-sm-5'>
-				<button type='button' class='btn btn-default btn-lg' disabled='disabled'>Paso ".$step."</button>
+			<div class='col-sm-12'>
+				".$nav_btns_out."
 			</div>
 		</fieldset>
 		".$fields_out."
@@ -417,7 +477,7 @@ function hce_form($step,$project_id = 0 ) {
 			<div class='col-sm-offset-3 col-sm-5'>
 				".$prev_step_out."
 				<div class='pull-right'>
-					<input class='btn btn-primary ' type='submit' value='Paso ".$next_step."' name='hce-form-step-submit' /><span class='glyphicon glyphicon-chevron-right'></span>
+					<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>
     				</div>
     			</div>
 		</fieldset>
