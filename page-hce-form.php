@@ -8,6 +8,17 @@ else { $step = 1; }
 if ( array_key_exists('project_id', $_GET) ) { $project_id = sanitize_text_field($_GET['project_id']); }
 else { $project_id = 0; }
 
+// form out
+if ( is_user_logged_in() ) { // if user is logged in, then hce form
+	$form_out = hce_form($step,$project_id);
+
+} else { // if user in not logged in, then log in form
+	$args = array(
+		'echo' => false,
+	);
+	$form_out = wp_login_form( $args );
+}
+
 // actions depending on step
 if ( $step == 2 && array_key_exists('hce-form-step-submit',$_POST) ) {
 	// insert project basic data
@@ -31,7 +42,7 @@ if ( $step == 2 && array_key_exists('hce-form-step-submit',$_POST) ) {
 
 <main class="row" role="main">
 	<section class="col-md-12">
-		<?php echo hce_form($step,$project_id); ?>
+		<?php echo $form_out; ?>
 	</section>
 </main>
 

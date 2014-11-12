@@ -66,7 +66,7 @@ wp_head(); ?>
 				wp_nav_menu( $args );
 			} ?>
 			<ul id="navbar-third" class="nav navbar-nav navbar-right">
-				<li class="navbar-socialb"><a href="#">Sesion</a></li>
+				<li class="navbar-socialb"><?php wp_loginout(site_url( $_SERVER['REQUEST_URI'] )); ?></li>
 			</ul>
 		</div>
 	</div>
