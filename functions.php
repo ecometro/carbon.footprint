@@ -140,11 +140,59 @@ function hce_remove_dashboard_item() {
 	remove_menu_page('edit.php');	
 }
 
+// insert project basic data from form
+function hce_project_insert_basic_data($title,$content,$cfields = array(),$location,$update_id = 0 ) {
+	$cfield_prefix = '_hce_project_';
+	$user_ID = get_current_user_id();
+
+	if ( $user_ID != 0 ) { // if user is logged in
+		$project = get_post($update_id);
+
+		if ( $project->ID == $update_id && $project->post_author == $user_ID ) { // if project exists, then update it
+			$args = array(
+				'ID' => $update_id,
+				'post_title' => $title,
+				'post_content' => $content,
+			);
+			// update project
+			$project_id = wp_update_post($args);
+
+		} else { // if project does not exist, then create it
+			$args = array(
+				'post_type' => 'project',
+				'post_status' => 'draft',
+				'post_author' => $user_ID,
+				'post_title' => $title,
+				'post_content' => $content,
+			);
+			// insert project
+			$project_id = wp_insert_post($args);
+		} // end if project exists
+
+			if ( $project_id != 0 ) { // if project has been created
+				// insert custom fields
+				reset($cfields);
+				foreach ( $cfields as $key => $value ) {
+					update_post_meta($project_id, $cfield_prefix.$key, $value);
+				}
+		$location .= "&project_id=".$project_id;
+			} // end if project has been created
+
+		// redirect to prevent resend
+		wp_redirect( $location );
+		exit;
+
+	} // end if user is logged in
+
+
+} // end insert project basic data from form
+
 // display HCE form to evaluate a project
-function hce_form($step,$project = NULL) {
+function hce_form($step,$project_id = 0 ) {
 
 	$wrong_step = 4;
 	$location = get_permalink();
+	$user_ID = get_current_user_id();
 
 	if ( $step >= $wrong_step ) {
 		wp_redirect( $location );
@@ -155,15 +203,42 @@ function hce_form($step,$project = NULL) {
 	if ( $step == $wrong_step - 1 ) { $action_next = ""; } else {
 		$next_step = $step + 1;
 		$action_next = $location."?step=".$next_step;
+		if ( $project_id != 0 ) { $action_next .= "&project_id=".$project_id; }
 	}
 	if ( $step != 1 ) {
 		$prev_step = $step - 1;
 		$action_prev = $location."?step=".$prev_step;
+		if ( $project_id != 0 ) { $action_prev .= "&project_id=".$project_id; }
 		$prev_step_out = "<span class='glyphicon glyphicon-chevron-left'></span> <a href='".$action_prev."' class='btn btn-default'>Paso ".$prev_step."</a>";
 	} else { $action_prev = ""; $prev_step_out = ""; }
 
-	// form fields in step 1
+	// WHAT TO SHOW
+	// in step 1
 	if ( $step == 1 ) {
+		$field_names = array("address","city","state","cp","use","built-area","useful-area","adjusted-area","users","budget","energy-label","energy-consumption","co2-emission");
+		if ( $project_id != 0 ) { // if project_id is defined
+			$project = get_post($project_id,ARRAY_A);
+			if ( is_array($project) && $user_ID == $project['post_author'] ) { // if projects exists and user is the author
+				$value['name'] = get_the_title($project_id);
+				$value_desc = $project['post_content'];
+				$cfield_prefix = '_hce_project_';
+				foreach ( $field_names as $field_name ) {
+					$value[$field_name] = get_post_meta($project_id,$cfield_prefix.$field_name,TRUE);
+				}
+			} else {
+				wp_redirect( $location );
+				exit;
+			} // end if project exists and user is the author
+
+		} else { // if project_id is not defined
+			$value['name'] = '';
+			$value_desc = '';
+			foreach ( $field_names as $field_name ) {
+				$value[$field_name] = '';
+			}
+
+		} // end if project_id is defined
+
 		$enctype_out = "";
 		// fields
 		$fields = array(
@@ -173,6 +248,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 1,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['name']
 			),
 			array(
 				'label' => 'Calle',
@@ -180,6 +256,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['address']
 			),
 			array(
 				'label' => 'Localidad',
@@ -187,6 +264,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['city']
 			),
 			array(
 				'label' => 'Provincia',
@@ -194,6 +272,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['state']
 			),
 			array(
 				'label' => 'Código postal',
@@ -201,6 +280,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['cp']
 			),
 			array(
 				'label' => 'Uso',
@@ -208,6 +288,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['use']
 			),
 			array(
 				'label' => 'Superficie construida',
@@ -215,6 +296,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 1,
 				'unit' => 'm2',
 				'comment' => '',
+				'value' => $value['built-area']
 			),
 			array(
 				'label' => 'Superficie útil',
@@ -222,6 +304,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 1,
 				'unit' => 'm2',
 				'comment' => '',
+				'value' => $value['useful-area']
 			),
 			array(
 				'label' => 'Superficie computable',
@@ -229,6 +312,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 1,
 				'unit' => 'm2',
 				'comment' => '',
+				'value' => $value['adjusted-area']
 			),
 			array(
 				'label' => 'Número de usuarios',
@@ -236,6 +320,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['users']
 			),
 			array(
 				'label' => 'Presupuesto',
@@ -243,6 +328,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '€',
 				'comment' => '',
+				'value' => $value['budget']
 			),
 			array(
 				'label' => 'Calificación energética',
@@ -250,6 +336,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
+				'value' => $value['energy-label']
 			),
 			array(
 				'label' => 'Consumo energético anual',
@@ -257,6 +344,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => 'kWh/m2 año',
 				'comment' => '',
+				'value' => $value['energy-consumption']
 			),
 			array(
 				'label' => 'Emisión anual de CO2',
@@ -264,6 +352,7 @@ function hce_form($step,$project = NULL) {
 				'required' => 0,
 				'unit' => 'Kg CO2/m2 año',
 				'comment' => '',
+				'value' => $value['co2-emission']
 			),
 		);
 	
@@ -281,7 +370,7 @@ function hce_form($step,$project = NULL) {
 			<fieldset class='form-group".$feedback_class."'>
 				<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label']."</label>
 				<div class='col-sm-5'>
-					<input class='form-control".$req_class."' type='text' value='' name='hce-form-step".$step."-".$field['name']."' />
+					<input class='form-control".$req_class."' type='text' value='".$field['value']."' name='hce-form-step".$step."-".$field['name']."' />
 					".$feedback."
 				</div>
 				".$help."
@@ -292,13 +381,13 @@ function hce_form($step,$project = NULL) {
 		<fieldset class='form-group'>
 				<label for='hce-form-step".$step."-desc' class='col-sm-3 control-label'>Descripción del proyecto</label>
 				<div class='col-sm-5'>
-					<textarea class='form-control' rows='3' name='hce-form-step".$step."-desc'></textarea>
+					<textarea class='form-control' rows='3' name='hce-form-step".$step."-desc'>".$value_desc."</textarea>
 				</div>
 		</fieldset>
 		";
 
 	}
-	// form fields in step 2
+	// in step 2
 	elseif ( $step == 2 ) {
 		$enctype_out = " enctype='multipart/form-data'";
 		$fields_out = "
@@ -312,6 +401,7 @@ function hce_form($step,$project = NULL) {
 		</fieldset>
 		";
 	} // end if step 2
+	// END WHAT TO SHOW
 
 	// form output
 	$form_out = "
@@ -327,7 +417,7 @@ function hce_form($step,$project = NULL) {
 			<div class='col-sm-offset-3 col-sm-5'>
 				".$prev_step_out."
 				<div class='pull-right'>
-					<input class='btn btn-primary ' type='submit' value='Paso ".$next_step."' name='hce-form-step".$step."-submit' /><span class='glyphicon glyphicon-chevron-right'></span>
+					<input class='btn btn-primary ' type='submit' value='Paso ".$next_step."' name='hce-form-step-submit' /><span class='glyphicon glyphicon-chevron-right'></span>
     				</div>
     			</div>
 		</fieldset>
@@ -336,7 +426,5 @@ function hce_form($step,$project = NULL) {
 	";
 	return $form_out;
 } // end display HCE form to evaluate a project
-
-// 
 
 ?>
