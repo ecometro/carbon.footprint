@@ -45,6 +45,13 @@ function hce_theme_setup() {
 	// disable admin bar in front end
 	add_filter('show_admin_bar', '__return_false');
 
+	// create custom tables in DB
+	add_action('after_switch_theme', 'hce_db_materials_table');
+	add_action('after_switch_theme', 'hce_db_emissions_table');
+
+	// update custom tables structure in DB
+	hce_db_custom_tables_update();
+
 } // end hce theme setup function
 
 // set up media options
@@ -487,4 +494,97 @@ function hce_form($step,$project_id = 0 ) {
 	return $form_out;
 } // end display HCE form to evaluate a project
 
+// createi or update emissions table in DB
+global $emissions_ver;
+$emissions_ver = "0.1"; 
+function hce_db_emissions_table() {
+	global $wpdb;
+	global $emissions_ver;
+
+	$charset_collate = '';
+	if ( ! empty( $wpdb->charset ) ) {
+		$charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
+	}
+	if ( ! empty( $wpdb->collate ) ) {
+		$charset_collate .= " COLLATE {$wpdb->collate}";
+	}
+	$table_name = $wpdb->prefix . "hce_emissions"; 
+
+	$sql = "
+	CREATE TABLE $table_name (
+	  id bigint(20) unsigned NOT NULL auto_increment,
+	  opendap_code char(7) NOT NULL default '0000000',
+	  type varchar(200) NOT NULL default '',
+	  subtype varchar(200) NOT NULL default '',
+	  emission_factor float(10,10) NOT NULL default 0,
+	  PRIMARY KEY  (id)
+	) $charset_collate;
+	";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+
+	update_option( 'hce_emissions_version', $emissions_ver );
+
+	
+
+} // end create emissions table in DB
+
+// create materials table in DB
+global $materials_ver;
+$materials_ver = "0.1"; 
+function hce_db_materials_table() {
+	global $wpdb;
+	global $materials_ver;
+
+	$charset_collate = '';
+	if ( ! empty( $wpdb->charset ) ) {
+		$charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
+	}
+	if ( ! empty( $wpdb->collate ) ) {
+		$charset_collate .= " COLLATE {$wpdb->collate}";
+	}
+	$table_name = $wpdb->prefix . "hce_materials"; 
+
+	$sql = "
+	CREATE TABLE $table_name (
+	  id bigint(20) unsigned NOT NULL auto_increment,
+	  code varchar(20) NOT NULL default '',
+	  unit varchar(10) NOT NULL default '',
+	  basic_material varchar(200) NOT NULL default '',
+	  basic_material_mass float(10,10) NOT NULL default 0,
+	  component_1 varchar(200) NOT NULL default '',
+	  component_1_mass float(10,10) NOT NULL default 0,
+	  component_2 varchar(200) NOT NULL default '',
+	  component_2_mass float(10,10) NOT NULL default 0,
+	  component_3 varchar(200) NOT NULL default '',
+	  component_3_mass float(10,10) NOT NULL default 0,
+	  dap_factor float(10,10) NOT NULL default 0,
+	  PRIMARY KEY  (id)
+	) $charset_collate;
+	";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+
+	update_option( 'hce_materials_version', $materials_ver );
+
+} // end create materials table in DB
+
+// update custom tables in DB
+function hce_db_custom_tables_update() {
+	global $wpdb;
+	global $emissions_ver;
+	global $materials_ver;
+
+	$emissions_installed_ver = get_option( "hce_emissions_version" );
+	$materials_installed_ver = get_option( "hce_materials_version" );
+
+	if ( $emissions_installed_ver != $emissions_ver ) {
+		hce_db_emissions_table();
+	}
+	if ( $materials_installed_ver != $materials_ver ) {
+		hce_db_materials_table();
+	}
+} // update custom tables in DB
 ?>
