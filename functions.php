@@ -52,6 +52,9 @@ function hce_theme_setup() {
 	// update custom tables structure in DB
 	hce_db_custom_tables_update();
 
+	// populate emissions table
+	hce_db_emissions_table_populate();
+
 } // end hce theme setup function
 
 // set up media options
@@ -532,7 +535,7 @@ function hce_db_emissions_table() {
 
 // create materials table in DB
 global $materials_ver;
-$materials_ver = "0.1"; 
+$materials_ver = "0.1";
 function hce_db_materials_table() {
 	global $wpdb;
 	global $materials_ver;
@@ -587,4 +590,80 @@ function hce_db_custom_tables_update() {
 		hce_db_materials_table();
 	}
 } // update custom tables in DB
+
+// populate emissions table
+function hce_db_emissions_table_populate() {
+
+	global $wpdb;
+
+	$emissions_data_current_ver = get_option( "hce_emissions_data_version" );
+	// data file
+	$filename = HCE_BLOGTHEME. "/data/opendap.csv"; // relative path to data filename
+	$line_length = "4096"; // max line lengh (increase in case you have longer lines than 1024 characters)
+	$delimiter = ","; // field delimiter character
+	$enclosure = '"'; // field enclosure character
+	
+	// open the data file
+	$fp = fopen($filename,'r');
+
+	if ( $fp !== FALSE ) { // if the file exists and is readable
+	
+		$table = $wpdb->prefix . "hce_emissions"; 
+		// data array generation
+		$line = 0;
+		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
+			if ( $line == 0 ) { // check version
+				$emissions_data_new_ver = $fp_csv[0];
+				if ( $emissions_data_current_ver == $emissions_data_new_ver ) { exit; /* stop: current version is up to date */ }
+
+			} elseif ( $line == 1 ) { /* csv file headers */ }
+
+			else {
+				// preparing data to insert
+				$opendap_code = $fp_csv[2];
+				$emission_factor = round($fp_csv[3],5);
+				$data = array(
+					//'id' => is autoincrement
+					'opendap_code' => $opendap_code,
+					'type' => $fp_csv[0],
+					'subtype' => $fp_csv[1],
+					'emission_factor' => $emission_factor
+				);
+				$format = array(
+					//'%d',
+					'%s',
+					'%s',
+					'%s',
+					'%s'
+				);
+				$where = array(
+					'opendap_code' => $opendap_code
+				);
+				// query to know if there is already rows for this opendap code
+				$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE opendap_code='$opendap_code' LIMIT 1";
+				$select = $wpdb->get_results($select_query,OBJECT_K);
+				if ( array_key_exists($opendap_code,$select) ) { // if there is a row for this code
+					if ( $select[$opendap_code]->emission_factor != $emission_factor ) {
+						/* update row */ $wpdb->update( $table, $data, $where, $format );
+					}
+
+				} else { // if there is no row for this code
+					/* create row */ $wpdb->insert( $table, $data, $format );
+
+				}
+
+			} // end if not line 0
+			$line++;
+
+		} // end main loop
+		fclose($fp);
+		update_option( 'hce_emissions_data_version', $emissions_data_new_ver );
+
+	} else { // if data file do not exist
+		echo "<h2>Error</h2>
+			<p>File with contents not found or not accesible.</p>
+			<p>Check the path: " .$csv_filename. ". Maybe it has to be absolute...</p>";
+	} // end if file exist and is readable
+
+} // end populate emissions table
 ?>
