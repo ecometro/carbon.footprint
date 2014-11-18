@@ -29,3 +29,9 @@ body { padding-top: 70px; }
 	right: 20px !important;
 	width: auto;
 }
+#form-steps {
+	margin-bottom: 20px;
+}
+.second-submit-button {
+	margin-left: 20px;
+}

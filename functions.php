@@ -151,14 +151,55 @@ function hce_remove_dashboard_item() {
 }
 
 // insert project basic data from form
-function hce_project_insert_basic_data($title,$content,$cfields = array(),$location,$update_id = 0 ) {
-	$cfield_prefix = '_hce_project_';
+function hce_project_insert_basic_data() {
+
+	$location = get_permalink();
 	$user_ID = get_current_user_id();
-
 	if ( $user_ID != 0 ) { // if user is logged in
-		$project = get_post($update_id);
 
-		if ( $project->ID == $update_id && $project->post_author == $user_ID ) { // if project exists, then update it
+		// check if update or new insert
+		if ( array_key_exists('project_id',$_GET) ) {
+			$update_id = sanitize_text_field($_GET['project_id']);
+			$project = get_post($update_id);
+			if ( $project->post_author != $user_ID ) { // if current user is not the author
+				$location .= "?step=1&feedback=wrong_user";
+				wp_redirect($location);
+				exit;
+
+			} elseif ( $project->ID != $update_id ) { // if project does not exist yet
+				$update_id = 0;
+			}
+		}
+		else { $update_id = 0; }
+
+		$field_prefix = "hce-form-step1-";
+		$title = sanitize_text_field($_POST[$field_prefix.'name']);
+		$content = sanitize_text_field($_POST[$field_prefix.'desc']);
+		$cfield_prefix = '_hce_project_';
+		// check if required fields exist
+		if ( $title == '' ) { // if project name is empty
+			$location .= "?step=1&feedback=required_field";
+			wp_redirect($location);
+			exit;
+		}
+		$req_cfields = array("built-area","useful-area","adjusted-area","users","budget");
+		foreach ( $req_cfields as $req_cfield ) {
+			$field = sanitize_text_field($_POST[$field_prefix.$req_cfield]);
+			if ( $field == '' ) { // if any custom field is empty
+				$location .= "?step=1&feedback=required_field";
+				wp_redirect($location);
+				exit;
+			} else { $cfields[$cfield_prefix.$req_cfield] = $field; }
+		}
+
+		$notreq_cfields = array("address","city","state","cp","use","energy-label","energy-consumption","co2-emission");
+		foreach ( $notreq_cfields as $notreq_cfield ) {
+			$field = sanitize_text_field($_POST[$field_prefix.$notreq_cfield]);
+			if ( $field != '' ) { $cfields[$cfield_prefix.$notreq_cfield] = $field; }
+		}
+		// end check if required fields exist
+
+		if ( $update_id != 0 ) { // if project exists, then update it
 			$args = array(
 				'ID' => $update_id,
 				'post_title' => $title,
@@ -166,6 +207,7 @@ function hce_project_insert_basic_data($title,$content,$cfields = array(),$locat
 			);
 			// update project
 			$project_id = wp_update_post($args);
+			$location_feedback = "&feedback=project_updated";
 
 		} else { // if project does not exist, then create it
 			$args = array(
@@ -177,6 +219,8 @@ function hce_project_insert_basic_data($title,$content,$cfields = array(),$locat
 			);
 			// insert project
 			$project_id = wp_insert_post($args);
+			$location_feedback = "&feedback=project_inserted";
+
 		} // end if project exists
 
 			if ( $project_id != 0 ) { // if project has been created
@@ -185,24 +229,186 @@ function hce_project_insert_basic_data($title,$content,$cfields = array(),$locat
 				foreach ( $cfields as $key => $value ) {
 					update_post_meta($project_id, $cfield_prefix.$key, $value);
 				}
-		$location .= "&project_id=".$project_id;
+		$location .= "?step=2&project_id=".$project_id.$location_feedback;
 			} // end if project has been created
 
 		// redirect to prevent resend
 		wp_redirect( $location );
 		exit;
 
-	} // end if user is logged in
+	} else { // if user is not logged in
+		$location .= "?step=1&feedback=user";
+		wp_redirect($location);
+		exit;
 
+	} // end if user is logged in
 
 } // end insert project basic data from form
 
+// upload project file
+function hce_project_upload_file() {
+	$location = get_permalink();
+	$cfield_prefix = '_hce_project_';
+	$user_ID = get_current_user_id();
+
+	if ( $user_ID != 0 ) { // if user is logged in
+
+		if ( array_key_exists('project_id', $_GET) ) { $project_id = sanitize_text_field($_GET['project_id']); }
+		else { $project_id = 0; }
+		$project = get_post($project_id);
+		if ( $project->post_author != $user_ID ) { // if current user is not the author
+				$location .= "?step=1&feedback=wrong_user";
+				wp_redirect($location);
+				exit;
+
+		} elseif ( $project->ID != $project_id ) { // if project does not exist yet
+				$location .= "?step=1&feedback=project";
+				wp_redirect($location);
+				exit;
+		}
+//		if ( $project->ID == $project_id && $project->post_author == $user_ID ) { // if project exists and current user is author
+		// do i delete the file
+		if ( sanitize_text_field($_POST['hce-form-step-submit']) == 'Sustituir archivo' ) {
+			if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
+				$location .= "?step=2&project_id=".$project_id."&feedback=file_not_deleted";
+			} else {
+				delete_post_meta($project_id,$cfield_prefix.'csv_file');
+				$location .= "?step=2&project_id=".$project_id."&feedback=file_deleted";
+			}
+			wp_redirect($location);
+			exit;
+
+		}
+			// check if file has been added with form
+			if ( array_key_exists('hce-form-step2-csv', $_FILES) ) {
+				$file = $_FILES['hce-form-step2-csv'];
+				// recheck if file has been added with form
+				if ( $file['name'] != '' ) {
+					$finfo = new finfo(FILEINFO_MIME_TYPE);
+					$mime = $finfo->file($file['tmp_name']); 
+					// checking if csv file has the right format and size
+					if ( $mime == 'text/plain' || $mime == 'text/csv' ) { /* if is text plain file */ }
+					else {
+						$location .= "?step=2&project_id=".$project_id."&feedback=fileformat";
+						wp_redirect($location);
+						exit;
+					}
+					if ( $file['size'] >= '40000' ) {
+						$location .= "?step=2&project_id=".$project_id."&feedback=filesize";
+						wp_redirect($location);
+						exit;
+					}
+
+				} else {
+					// if filename is empty: no file uploaded
+					$location .= "?step=2&project_id=".$project_id."&feedback=nofile";
+					wp_redirect($location);
+					exit;
+
+				} // end recheck if file has been added with form
+
+			} else {
+				// if no file uploaded
+				$location .= "?step=2&project_id=".$project_id."&feedback=nofile";
+				wp_redirect($location);
+				exit;
+
+			} // end check if file has been added with form
+
+			// file insert
+			$upload_dir_vars = wp_upload_dir();
+			$upload_dir = $upload_dir_vars['path']; // absolute path to uploads folder
+			$uploaddir = realpath($upload_dir);
+
+			$filename = basename($file['name']); // file name in client machine
+			$filename = trim($filename); // removing spaces at the begining and end
+			$filename = ereg_replace(" ", "-", $filename); // removing spaces inside the name
+
+			$typefile = $file['type']; // file type
+			$uploadfile = $uploaddir.'/'.$filename;
+
+			$slugname = preg_replace('/\.[^.]+$/', '', basename($uploadfile));
+
+			// if filename already associated to other file
+			if ( file_exists($uploadfile) ) {
+				$count = "a";
+				while ( file_exists($uploadfile) ) {
+					$count++;
+					$uploadfile = $uploaddir.'/'.$slugname.'-'.$count.'.csv';
+				}
+			} // end if filename already associated to other file
+
+			// if the file is correctly uploaded, then do the insert
+			if ( move_uploaded_file($file['tmp_name'], $uploadfile) ) {
+				$attachment = array(
+					'post_mime_type' => $typefile,
+					'post_title' => "Materiales del proyecto " .$project->post_title,
+					'post_content' => '',
+					'post_status' => 'inherit'
+				);
+
+				$attach_id = wp_insert_attachment( $attachment, $uploadfile, $project_id );
+				// you must first include the image.php file
+				// for the function wp_generate_attachment_metadata() to work
+				require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+
+				$attach_data = wp_generate_attachment_metadata( $attach_id, $uploadfile );
+				wp_update_attachment_metadata( $attach_id,  $attach_data );
+			
+				update_post_meta($project_id, $cfield_prefix.'csv_file', $attach_id);
+				//$img_url = wp_get_attachment_url($attach_id);
+
+			} // end if the file is correctly uploaded
+
+			// redirect to prevent resend
+			$location .= "?step=3&project_id=".$project_id."&feedback=file_uploaded";
+			wp_redirect( $location );
+			exit;
+
+//		} else { // if project doesn't exist or current user is not the author
+//			$location .= "?step=1&feedback=project";
+//			wp_redirect($location);
+//			exit;
+//
+//		} // end if project exists and current user is the author
+
+	} else { // if user is not logged in
+			$location .= "?step=1&feedback=user";
+			wp_redirect($location);
+			exit;
+
+	} // end if user is logged in
+
+} // end upload project file
+
 // display HCE form to evaluate a project
-function hce_form($step,$project_id = 0 ) {
+function hce_form() {
 
 	$last_step = 3;
 	$location = get_permalink();
 	$user_ID = get_current_user_id();
+
+	// form step and current project id
+	if ( array_key_exists('step', $_GET) ) { $step = sanitize_text_field($_GET['step']); }
+	else { $step = 1; }
+	if ( array_key_exists('project_id', $_GET) ) {
+		$project_id = sanitize_text_field($_GET['project_id']);
+		$project = get_post($project_id,ARRAY_A);
+		if ( $project['ID'] != $project_id ) { // if project does not exists
+			$location .= "?step=1&feedback=project";
+			wp_redirect( $location );
+			exit;
+		}
+		elseif ( $user_ID != $project['post_author'] ) { // if user is not the author
+			$location .= "?step=1&feedback=wrong_user";
+			wp_redirect( $location );
+			exit;
+		}
+
+	} else { $project_id = 0; }
+	// form feedback
+	if ( array_key_exists('feedback',$_GET) ) { $form_feedback = sanitize_text_field($_GET['feedback']); }
+	else { $form_feedback = '';  }
 
 	if ( $step >> $last_step ) {
 		wp_redirect( $location );
@@ -222,24 +428,35 @@ function hce_form($step,$project_id = 0 ) {
 		$prev_step_out = "<span class='glyphicon glyphicon-chevron-left'></span> <a href='".$action_prev."' class='btn btn-default'>Volver al paso ".$prev_step."</a>";
 	} else { $action_prev = ""; $prev_step_out = ""; }
 
+	// FORM FEEDBACK: error and success
+	if ( $form_feedback != '' ) {
+		if ( $form_feedback == 'required_field' ) { $feedback_type = "danger"; $feedback_text = "Alguno de los campos requeridos para enviar el formulario están vacíos. Por favor, revisalos y vuelve a intentarlo."; }
+		elseif ( $form_feedback == 'fileformat' ) { $feedback_type = "danger"; $feedback_text = "El archivo debe ser CSV. Parece que el que has intentado subir no lo es. Puedes intentarlo de nuevo en el formulario de abajo."; }
+		elseif ( $form_feedback == 'filesize' ) { $feedback_type = "danger"; $feedback_text = "El archivo debe ser menor de 40kB. Parece que el que has intentado subir pesa más. Puedes intentarlo de nuevo en el formulario de abajo."; }
+		elseif ( $form_feedback == 'nofile' ) { $feedback_type = "danger"; $feedback_text = "No has añadido ningún archivo. Sin archivo no puedes continuar con el proceso de evaluación de tu proyecto."; }
+		elseif ( $form_feedback == 'project' ) { $feedback_type = "danger"; $feedback_text = "Algo no encaja: el proyecto que intentas evaluar parece que no existe. Vuelve a empezar."; }
+		elseif ( $form_feedback == 'wrong_user' ) { $feedback_type = "danger"; $feedback_text = "Algo no encaja: parece que tú no eres el autor del proyecto que intentas editar. Vuelve a empezar."; }
+		elseif ( $form_feedback == 'file_not_deleted' ) { $feedback_type = "danger"; $feedback_text = "Alfo falló: el archivo de mediciones no se ha eliminado. Quizás quieras volver a intentarlo."; }
+		elseif ( $form_feedback == 'user' ) { $feedback_type = "success"; $feedback_text = "Debes iniciar sesión para evaluar un proyecto."; }
+		elseif ( $form_feedback == 'project_inserted' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido guardados."; }
+		elseif ( $form_feedback == 'project_updated' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido actualizados."; }
+		elseif ( $form_feedback == 'file_uploaded' ) { $feedback_type = "success"; $feedback_text = "El archivo de mediciones ha sido guardado correctamente."; }
+		elseif ( $form_feedback == 'file_deleted' ) { $feedback_type = "success"; $feedback_text = "El archivo de mediciones ha sido eliminado. Ahora puedes añadir uno nuevo."; }
+		$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
+	} else { $feedback_out = ""; }
+	// end ERROR FEEDBACK
+
 	// WHAT TO SHOW
 	// in step 1
 	if ( $step == 1 ) {
 		$field_names = array("address","city","state","cp","use","built-area","useful-area","adjusted-area","users","budget","energy-label","energy-consumption","co2-emission");
 		if ( $project_id != 0 ) { // if project_id is defined
-			$project = get_post($project_id,ARRAY_A);
-			if ( is_array($project) && $user_ID == $project['post_author'] ) { // if projects exists and user is the author
-				$value['name'] = get_the_title($project_id);
-				$value_desc = $project['post_content'];
-				$cfield_prefix = '_hce_project_';
-				foreach ( $field_names as $field_name ) {
-					$value[$field_name] = get_post_meta($project_id,$cfield_prefix.$field_name,TRUE);
-				}
-			} else {
-				wp_redirect( $location );
-				exit;
-			} // end if project exists and user is the author
-
+			$value['name'] = get_the_title($project_id);
+			$value_desc = $project['post_content'];
+			$cfield_prefix = '_hce_project_';
+			foreach ( $field_names as $field_name ) {
+				$value[$field_name] = get_post_meta($project_id,$cfield_prefix.$field_name,TRUE);
+			}
 
 		} else { // if project_id is not defined
 			$value['name'] = '';
@@ -252,6 +469,7 @@ function hce_form($step,$project_id = 0 ) {
 
 		$enctype_out = "";
 		$submit_out = 'Guardar e ir al paso '.$next_step;
+		$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
 		// fields
 		$fields = array(
 			array(
@@ -259,7 +477,7 @@ function hce_form($step,$project_id = 0 ) {
 				'name' => 'name',
 				'required' => 1,
 				'unit' => '',
-				'comment' => '',
+				'comment' => '<span class="glyphicon glyphicon-asterisk"></span> Campos requeridos.',
 				'value' => $value['name']
 			),
 			array(
@@ -329,7 +547,7 @@ function hce_form($step,$project_id = 0 ) {
 			array(
 				'label' => 'Número de usuarios',
 				'name' => 'users',
-				'required' => 0,
+				'required' => 1,
 				'unit' => '',
 				'comment' => '',
 				'value' => $value['users']
@@ -337,7 +555,7 @@ function hce_form($step,$project_id = 0 ) {
 			array(
 				'label' => 'Presupuesto',
 				'name' => 'budget',
-				'required' => 0,
+				'required' => 1,
 				'unit' => '€',
 				'comment' => '',
 				'value' => $value['budget']
@@ -370,7 +588,7 @@ function hce_form($step,$project_id = 0 ) {
 	
 		$fields_out = "";
 		foreach ( $fields as $field ) {
-			if ( $field['required'] == 1 ) { $req_class = " req"; } else { $req_class = ""; }
+			if ( $field['required'] == 1 ) { $req_class = " <span class='glyphicon glyphicon-asterisk'></span>"; } else { $req_class = ""; }
 			if ( $field['unit'] != '' ) {
 				$feedback_class = " has-feedback";
 				$feedback = "<span class='form-control-feedback'>".$field['unit']."</span>";
@@ -380,9 +598,9 @@ function hce_form($step,$project_id = 0 ) {
 			} else { $help = ""; }
 			$fields_out .= "
 			<fieldset class='form-group".$feedback_class."'>
-				<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label']."</label>
+				<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label'].$req_class."</label>
 				<div class='col-sm-5'>
-					<input class='form-control".$req_class."' type='text' value='".$field['value']."' name='hce-form-step".$step."-".$field['name']."' />
+					<input class='form-control' type='text' value='".$field['value']."' name='hce-form-step".$step."-".$field['name']."' />
 					".$feedback."
 				</div>
 				".$help."
@@ -401,23 +619,46 @@ function hce_form($step,$project_id = 0 ) {
 	}
 	// in step 2
 	elseif ( $step == 2 ) {
-		$enctype_out = " enctype='multipart/form-data'";
-		$submit_out = 'Subir archivo e ir al paso '.$next_step;
-		$fields_out = "
-		<fieldset class='form-group'>
-			<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo presupuesto</label>
-			<div class='col-sm-5'>
-				<input type='file' name='hce-form-step".$step."-csv' />
-				<input type='hidden' name='MAX_FILE_SIZE' value='4000000' />
-			</div>
-			<p class='col-sm-4 help-block'><small>Aquí algunas instrucciones que cuenten cosas...</small></p>
-		</fieldset>
-		";
+		// check if project has already a csv file uploaded
+		$csv_file_id = get_post_meta($project_id,'_hce_project_csv_file',true);
+		if ( $csv_file_id != '' ) {
+			$csv_file = get_post($csv_file_id);
+			$enctype_out = "";
+			$link_out = 'Ir al paso '.$next_step;
+			$submit_out = 'Sustituir archivo';
+			$next_step_out = "<input class='btn btn-danger' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-warning-sign'></span> <a class='second-submit-button btn btn-primary' href='".$location."?step=".$next_step."&project_id=".$project_id."'>".$link_out."</a> <span class='glyphicon glyphicon-chevron-right'></span>";
+			$fields_out = "
+			<fieldset class='form-group'>
+				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo de mediciones</label>
+				<div class='col-sm-5'>
+					<p>El archivo de mediciones asociado a este proyecto fue correctamente añadido y procesado.</p>
+				</div>
+			</fieldset>
+			";		
+
+		} else {
+			$enctype_out = " enctype='multipart/form-data'";
+			$submit_out = 'Subir archivo e ir al paso '.$next_step;
+			$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
+			$fields_out = "
+			<fieldset class='form-group'>
+				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo de mediciones</label>
+				<div class='col-sm-5'>
+					<input type='file' name='hce-form-step".$step."-csv' />
+					<input type='hidden' name='MAX_FILE_SIZE' value='40000' />
+				</div>
+				<p class='col-sm-4 help-block'><small>Formato CSV. Tamaño máximo 40kB.</small></p>
+			</fieldset>
+			";
+
+		}
+
 	}
 	// in step 3
 	elseif ( $step == 3 ) {
 		$enctype_out = "";
 		$submit_out = "Calcular emisiones";
+		$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
 		$distances_out = "
 			<option value=''>Distancia</option>
 			<option value='200'>Local (200 km)</option>
@@ -466,7 +707,7 @@ function hce_form($step,$project_id = 0 ) {
 			'after' => ""
 		),
 	);
-	$nav_btns_out = "<label>Pasos:</label> ";
+	$nav_btns_out = "<strong>Pasos:</strong> ";
 	reset($btns);
 	foreach ( $btns as $btn ) {
 		if ( $step == $btn['step'] ) { $btn['status'] = " btn-primary"; }
@@ -475,20 +716,18 @@ function hce_form($step,$project_id = 0 ) {
 
 	// form output
 	$form_out = "
+	<div class='row'>
+		<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
+		<div class='col-sm-3'>".$feedback_out."</div>
+	</div>
+
 	<form class='row' id='hce-form-step".$step."' method='post' action='" .$action_next. "'" .$enctype_out. ">
 		<div class='form-horizontal col-md-12'>
-		<fieldset class='form-group'>
-			<div class='col-sm-12'>
-				".$nav_btns_out."
-			</div>
-		</fieldset>
 		".$fields_out."
 		<fieldset class='form-group'>
 			<div class='col-sm-offset-3 col-sm-5'>
 				".$prev_step_out."
-				<div class='pull-right'>
-					<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>
-    				</div>
+				<div class='pull-right'>".$next_step_out."</div>
     			</div>
 		</fieldset>
 		</div>
