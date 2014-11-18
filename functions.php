@@ -50,10 +50,10 @@ function hce_theme_setup() {
 	add_action('after_switch_theme', 'hce_db_emissions_table');
 
 	// update custom tables structure in DB
-	hce_db_custom_tables_update();
+	add_action( 'init', 'hce_db_custom_tables_update', 99 );
 
 	// populate emissions table
-	hce_db_emissions_table_populate();
+	add_action( 'init', 'hce_db_emissions_table_populate', 100 );
 
 } // end hce theme setup function
 
@@ -614,7 +614,7 @@ function hce_db_emissions_table_populate() {
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { // check version
 				$emissions_data_new_ver = $fp_csv[0];
-				if ( $emissions_data_current_ver == $emissions_data_new_ver ) { exit; /* stop: current version is up to date */ }
+				if ( $emissions_data_current_ver == $emissions_data_new_ver ) { return; /* stop: current version is up to date */ }
 
 			} elseif ( $line == 1 ) { /* csv file headers */ }
 
