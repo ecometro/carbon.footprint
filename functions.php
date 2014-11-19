@@ -191,13 +191,15 @@ function hce_project_insert_basic_data() {
 				exit;
 			} else { $cfields[$cfield_prefix.$req_cfield] = $field; }
 		}
+		// end check if required fields exist
 
+		// no required fields
 		$notreq_cfields = array("address","city","state","cp","use","energy-label","energy-consumption","co2-emission");
 		foreach ( $notreq_cfields as $notreq_cfield ) {
 			$field = sanitize_text_field($_POST[$field_prefix.$notreq_cfield]);
 			if ( $field != '' ) { $cfields[$cfield_prefix.$notreq_cfield] = $field; }
 		}
-		// end check if required fields exist
+		// end no required fields
 
 		if ( $update_id != 0 ) { // if project exists, then update it
 			$args = array(
@@ -227,7 +229,7 @@ function hce_project_insert_basic_data() {
 				// insert custom fields
 				reset($cfields);
 				foreach ( $cfields as $key => $value ) {
-					update_post_meta($project_id, $cfield_prefix.$key, $value);
+					update_post_meta($project_id, $key, $value);
 				}
 				// create custom table for project in DB
 				hce_project_create_table($project_id);
@@ -265,11 +267,11 @@ function hce_project_create_table($project_id) {
 	  id bigint(20) unsigned NOT NULL auto_increment,
 	  material_code varchar(12) NOT NULL default '',
 	  material_name varchar(100) NOT NULL default '',
-	  material_ammount float(10,3) NOT NULL default 0,
+	  material_amount float(10,3) NOT NULL default 0,
 	  material_unit varchar(10) NOT NULL default '',
 	  construction_unit_code varchar(12) NOT NULL default '',
 	  construction_unit_name varchar(100) NOT NULL default '',
-	  construction_unit_ammount float(10,3) NOT NULL default 0,
+	  construction_unit_amount float(10,3) NOT NULL default 0,
 	  construction_unit_unit varchar(10) NOT NULL default '',
 	  section_code varchar(12) NOT NULL default '',
 	  section_name varchar(100) NOT NULL default '',
@@ -284,6 +286,91 @@ function hce_project_create_table($project_id) {
 	dbDelta( $sql );
 
 } // end create project table in DB
+
+// populate project table in DB
+function hce_project_populate_table($project_id,$csv_file_id) {
+
+	global $wpdb;
+	$cfield_prefix = '_hce_project_';
+	$location = get_permalink();
+
+	// data file
+	$filename = wp_get_attachment_url($csv_file_id); // relative path to data filename
+	$line_length = "4096"; // max line lengh (increase in case you have longer lines than 1024 characters)
+	$delimiter = ";"; // field delimiter character
+	$enclosure = ''; // field enclosure character
+	
+	// open the data file
+	$fp = fopen($filename,'r');
+
+	if ( $fp !== FALSE ) { // if the file exists and is readable
+	
+		$table = $wpdb->prefix . "hce_project_" .$project_id; 
+		$format = array(
+			//'%d',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s'
+		);
+
+		$line = 0;
+		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter)) !== FALSE ) { // begin main loop
+			if ( $line == 0 ) { /* csv file headers */ }
+			else {
+				// check  empty lines
+				if ( $fp_csv[0] == '' ) { /* empty or not valid line */ }
+				else {
+					// preparing data to insert
+					$material_amount = str_replace(",",".",$fp_csv[3]);
+					$material_amount = round($material_amount,3);
+					$construction_unit_amount = str_replace(",",".",$fp_csv[7]);
+					$construction_unit_amount = round($construction_unit_amount,3);
+					$data = array(
+						//'id' => is autoincrement
+						'material_code' => $fp_csv[0],
+						'material_name' => mb_convert_encoding($fp_csv[2], "UTF-8"),
+						'material_amount' => $material_amount,
+						'material_unit' => $fp_csv[1],
+						'construction_unit_code' => $fp_csv[4],
+						'construction_unit_name' => mb_convert_encoding($fp_csv[6], "UTF-8"),
+						'construction_unit_amount' => $construction_unit_amount,
+						'construction_unit_unit' => $fp_csv[5],
+						'section_code' => $fp_csv[10],
+						'section_name' => mb_convert_encoding($fp_csv[11], "UTF-8"),
+						'subsection_code' => $fp_csv[8],
+						'subsection_name' => mb_convert_encoding($fp_csv[9], "UTF-8")
+					);
+					/* create row */ $wpdb->insert( $table, $data, $format );
+	
+				} // end if valid line
+
+			} // end if not line 0
+			$line++;
+
+		} // end main loop
+		fclose($fp);
+
+	} else { // if data file do not exist
+		// if there was a problem with CSV file, we try to delete it
+		if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
+		} else { delete_post_meta($project_id,$cfield_prefix.'csv_file'); }
+
+		$location .= "?step=2&project_id=".$project_id."&feedback=populate_table";
+		wp_redirect($location);
+		exit;
+
+	} // end if file exist and is readable
+
+} // end populate project table in DB
 
 
 // upload project file
@@ -365,7 +452,7 @@ function hce_project_upload_file() {
 
 		$filename = basename($file['name']); // file name in client machine
 		$filename = trim($filename); // removing spaces at the begining and end
-		$filename = ereg_replace(" ", "-", $filename); // removing spaces inside the name
+		$filename = str_replace(" ", "-", $filename); // removing spaces inside the name
 
 		$typefile = $file['type']; // file type
 		$uploadfile = $uploaddir.'/'.$filename;
@@ -391,15 +478,22 @@ function hce_project_upload_file() {
 			);
 
 			$attach_id = wp_insert_attachment( $attachment, $uploadfile, $project_id );
-			// you must first include the image.php file
-			// for the function wp_generate_attachment_metadata() to work
-			require_once(ABSPATH . "wp-admin" . '/includes/image.php');
 
-			$attach_data = wp_generate_attachment_metadata( $attach_id, $uploadfile );
-			wp_update_attachment_metadata( $attach_id,  $attach_data );
+			if ( $attach_id != 0 ) { // if CSV has been inserted
+				// you must first include the image.php file
+				// for the function wp_generate_attachment_metadata() to work
+				require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+
+				$attach_data = wp_generate_attachment_metadata( $attach_id, $uploadfile );
+				wp_update_attachment_metadata( $attach_id,  $attach_data );
 		
-			update_post_meta($project_id, $cfield_prefix.'csv_file', $attach_id);
-			//$img_url = wp_get_attachment_url($attach_id);
+				update_post_meta($project_id, $cfield_prefix.'csv_file', $attach_id);
+				//$img_url = wp_get_attachment_url($attach_id);
+
+				// populate project table with file data
+				hce_project_populate_table($project_id,$attach_id);
+
+			} // end if CSV has been inserted
 
 		} // end if the file is correctly uploaded
 
@@ -473,7 +567,8 @@ function hce_form() {
 		elseif ( $form_feedback == 'nofile' ) { $feedback_type = "danger"; $feedback_text = "No has añadido ningún archivo. Sin archivo no puedes continuar con el proceso de evaluación de tu proyecto."; }
 		elseif ( $form_feedback == 'project' ) { $feedback_type = "danger"; $feedback_text = "Algo no encaja: el proyecto que intentas evaluar parece que no existe. Vuelve a empezar."; }
 		elseif ( $form_feedback == 'wrong_user' ) { $feedback_type = "danger"; $feedback_text = "Algo no encaja: parece que tú no eres el autor del proyecto que intentas editar. Vuelve a empezar."; }
-		elseif ( $form_feedback == 'file_not_deleted' ) { $feedback_type = "danger"; $feedback_text = "Alfo falló: el archivo de mediciones no se ha eliminado. Quizás quieras volver a intentarlo."; }
+		elseif ( $form_feedback == 'file_not_deleted' ) { $feedback_type = "danger"; $feedback_text = "Algo falló: el archivo de mediciones no se ha eliminado. Quizás quieras volver a intentarlo."; }
+		elseif ( $form_feedback == 'populate_table' ) { $feedback_type = "danger"; $feedback_text = "La información del archivo de mediciones no pudo incorporarse a la base de datos. Revisa la estructura del archivo e intenta volver a subirlo al servidor."; }
 		elseif ( $form_feedback == 'user' ) { $feedback_type = "success"; $feedback_text = "Debes iniciar sesión para evaluar un proyecto."; }
 		elseif ( $form_feedback == 'project_inserted' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido guardados."; }
 		elseif ( $form_feedback == 'project_updated' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido actualizados."; }
@@ -883,7 +978,14 @@ function hce_db_emissions_table_populate() {
 	if ( $fp !== FALSE ) { // if the file exists and is readable
 	
 		$table = $wpdb->prefix . "hce_emissions"; 
-		// data array generation
+		$format = array(
+			//'%d',
+			'%s',
+			'%s',
+			'%s',
+			'%s'
+		);
+
 		$line = 0;
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { // check version
@@ -902,13 +1004,6 @@ function hce_db_emissions_table_populate() {
 					'type' => $fp_csv[0],
 					'subtype' => $fp_csv[1],
 					'emission_factor' => $emission_factor
-				);
-				$format = array(
-					//'%d',
-					'%s',
-					'%s',
-					'%s',
-					'%s'
 				);
 				$where = array(
 					'opendap_code' => $opendap_code
