@@ -20,7 +20,6 @@ if ( is_user_logged_in() ) { // if user is logged in, then hce form
 	elseif ( $step == 3 && array_key_exists('hce-form-step-submit',$_POST ) ) {
 		// upload project file
 		hce_project_upload_file();
-
 	} // end step 3 actions
 
 } else { // if user in not logged in, then log in form

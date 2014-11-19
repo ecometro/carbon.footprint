@@ -229,7 +229,9 @@ function hce_project_insert_basic_data() {
 				foreach ( $cfields as $key => $value ) {
 					update_post_meta($project_id, $cfield_prefix.$key, $value);
 				}
-		$location .= "?step=2&project_id=".$project_id.$location_feedback;
+				// create custom table for project in DB
+				hce_project_create_table($project_id);
+				$location .= "?step=2&project_id=".$project_id.$location_feedback;
 			} // end if project has been created
 
 		// redirect to prevent resend
@@ -244,6 +246,45 @@ function hce_project_insert_basic_data() {
 	} // end if user is logged in
 
 } // end insert project basic data from form
+
+// create project table in DB
+function hce_project_create_table($project_id) {
+	global $wpdb;
+
+	$charset_collate = '';
+	if ( ! empty( $wpdb->charset ) ) {
+		$charset_collate = "DEFAULT CHARACTER SET {$wpdb->charset}";
+	}
+	if ( ! empty( $wpdb->collate ) ) {
+		$charset_collate .= " COLLATE {$wpdb->collate}";
+	}
+	$table_name = $wpdb->prefix . "hce_project_" .$project_id; 
+
+	$sql = "
+	CREATE TABLE $table_name (
+	  id bigint(20) unsigned NOT NULL auto_increment,
+	  material_code varchar(12) NOT NULL default '',
+	  material_name varchar(100) NOT NULL default '',
+	  material_ammount float(10,3) NOT NULL default 0,
+	  material_unit varchar(10) NOT NULL default '',
+	  construction_unit_code varchar(12) NOT NULL default '',
+	  construction_unit_name varchar(100) NOT NULL default '',
+	  construction_unit_ammount float(10,3) NOT NULL default 0,
+	  construction_unit_unit varchar(10) NOT NULL default '',
+	  section_code varchar(12) NOT NULL default '',
+	  section_name varchar(100) NOT NULL default '',
+	  subsection_code varchar(12) NOT NULL default '',
+	  subsection_name varchar(100) NOT NULL default '',
+	  emission float(10,5) NOT NULL default 0,
+	  PRIMARY KEY  (id)
+	) $charset_collate;
+	";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+
+} // end create project table in DB
+
 
 // upload project file
 function hce_project_upload_file() {
@@ -266,8 +307,8 @@ function hce_project_upload_file() {
 				wp_redirect($location);
 				exit;
 		}
-//		if ( $project->ID == $project_id && $project->post_author == $user_ID ) { // if project exists and current user is author
-		// do i delete the file
+
+		// if 'Delete file' button has been click, then delete file
 		if ( sanitize_text_field($_POST['hce-form-step-submit']) == 'Sustituir archivo' ) {
 			if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_not_deleted";
@@ -279,98 +320,93 @@ function hce_project_upload_file() {
 			exit;
 
 		}
-			// check if file has been added with form
-			if ( array_key_exists('hce-form-step2-csv', $_FILES) ) {
-				$file = $_FILES['hce-form-step2-csv'];
-				// recheck if file has been added with form
-				if ( $file['name'] != '' ) {
-					$finfo = new finfo(FILEINFO_MIME_TYPE);
-					$mime = $finfo->file($file['tmp_name']); 
-					// checking if csv file has the right format and size
-					if ( $mime == 'text/plain' || $mime == 'text/csv' ) { /* if is text plain file */ }
-					else {
-						$location .= "?step=2&project_id=".$project_id."&feedback=fileformat";
-						wp_redirect($location);
-						exit;
-					}
-					if ( $file['size'] >= '40000' ) {
-						$location .= "?step=2&project_id=".$project_id."&feedback=filesize";
-						wp_redirect($location);
-						exit;
-					}
+		// end delete file
 
-				} else {
-					// if filename is empty: no file uploaded
-					$location .= "?step=2&project_id=".$project_id."&feedback=nofile";
+		// check if file has been added with form
+		if ( array_key_exists('hce-form-step2-csv', $_FILES) ) {
+			$file = $_FILES['hce-form-step2-csv'];
+			// recheck if file has been added with form
+			if ( $file['name'] != '' ) {
+				$finfo = new finfo(FILEINFO_MIME_TYPE);
+				$mime = $finfo->file($file['tmp_name']); 
+				// checking if csv file has the right format and size
+				if ( $mime == 'text/plain' || $mime == 'text/csv' ) { /* if is text plain file */ }
+				else {
+					$location .= "?step=2&project_id=".$project_id."&feedback=fileformat";
 					wp_redirect($location);
 					exit;
-
-				} // end recheck if file has been added with form
+				}
+				if ( $file['size'] >= '40000' ) {
+					$location .= "?step=2&project_id=".$project_id."&feedback=filesize";
+					wp_redirect($location);
+					exit;
+				}
 
 			} else {
-				// if no file uploaded
+				// if filename is empty: no file uploaded
 				$location .= "?step=2&project_id=".$project_id."&feedback=nofile";
 				wp_redirect($location);
 				exit;
 
-			} // end check if file has been added with form
+			} // end recheck if file has been added with form
 
-			// file insert
-			$upload_dir_vars = wp_upload_dir();
-			$upload_dir = $upload_dir_vars['path']; // absolute path to uploads folder
-			$uploaddir = realpath($upload_dir);
-
-			$filename = basename($file['name']); // file name in client machine
-			$filename = trim($filename); // removing spaces at the begining and end
-			$filename = ereg_replace(" ", "-", $filename); // removing spaces inside the name
-
-			$typefile = $file['type']; // file type
-			$uploadfile = $uploaddir.'/'.$filename;
-
-			$slugname = preg_replace('/\.[^.]+$/', '', basename($uploadfile));
-
-			// if filename already associated to other file
-			if ( file_exists($uploadfile) ) {
-				$count = "a";
-				while ( file_exists($uploadfile) ) {
-					$count++;
-					$uploadfile = $uploaddir.'/'.$slugname.'-'.$count.'.csv';
-				}
-			} // end if filename already associated to other file
-
-			// if the file is correctly uploaded, then do the insert
-			if ( move_uploaded_file($file['tmp_name'], $uploadfile) ) {
-				$attachment = array(
-					'post_mime_type' => $typefile,
-					'post_title' => "Materiales del proyecto " .$project->post_title,
-					'post_content' => '',
-					'post_status' => 'inherit'
-				);
-
-				$attach_id = wp_insert_attachment( $attachment, $uploadfile, $project_id );
-				// you must first include the image.php file
-				// for the function wp_generate_attachment_metadata() to work
-				require_once(ABSPATH . "wp-admin" . '/includes/image.php');
-
-				$attach_data = wp_generate_attachment_metadata( $attach_id, $uploadfile );
-				wp_update_attachment_metadata( $attach_id,  $attach_data );
-			
-				update_post_meta($project_id, $cfield_prefix.'csv_file', $attach_id);
-				//$img_url = wp_get_attachment_url($attach_id);
-
-			} // end if the file is correctly uploaded
-
-			// redirect to prevent resend
-			$location .= "?step=3&project_id=".$project_id."&feedback=file_uploaded";
-			wp_redirect( $location );
+		} else {
+			// if no file uploaded
+			$location .= "?step=2&project_id=".$project_id."&feedback=nofile";
+			wp_redirect($location);
 			exit;
 
-//		} else { // if project doesn't exist or current user is not the author
-//			$location .= "?step=1&feedback=project";
-//			wp_redirect($location);
-//			exit;
-//
-//		} // end if project exists and current user is the author
+		} // end check if file has been added with form
+
+		// file insert
+		$upload_dir_vars = wp_upload_dir();
+		$upload_dir = $upload_dir_vars['path']; // absolute path to uploads folder
+		$uploaddir = realpath($upload_dir);
+
+		$filename = basename($file['name']); // file name in client machine
+		$filename = trim($filename); // removing spaces at the begining and end
+		$filename = ereg_replace(" ", "-", $filename); // removing spaces inside the name
+
+		$typefile = $file['type']; // file type
+		$uploadfile = $uploaddir.'/'.$filename;
+
+		$slugname = preg_replace('/\.[^.]+$/', '', basename($uploadfile));
+
+		// if filename already associated to other file
+		if ( file_exists($uploadfile) ) {
+			$count = "a";
+			while ( file_exists($uploadfile) ) {
+				$count++;
+				$uploadfile = $uploaddir.'/'.$slugname.'-'.$count.'.csv';
+			}
+		} // end if filename already associated to other file
+
+		// if the file is correctly uploaded, then do the insert
+		if ( move_uploaded_file($file['tmp_name'], $uploadfile) ) {
+			$attachment = array(
+				'post_mime_type' => $typefile,
+				'post_title' => "Materiales del proyecto " .$project->post_title,
+				'post_content' => '',
+				'post_status' => 'inherit'
+			);
+
+			$attach_id = wp_insert_attachment( $attachment, $uploadfile, $project_id );
+			// you must first include the image.php file
+			// for the function wp_generate_attachment_metadata() to work
+			require_once(ABSPATH . "wp-admin" . '/includes/image.php');
+
+			$attach_data = wp_generate_attachment_metadata( $attach_id, $uploadfile );
+			wp_update_attachment_metadata( $attach_id,  $attach_data );
+		
+			update_post_meta($project_id, $cfield_prefix.'csv_file', $attach_id);
+			//$img_url = wp_get_attachment_url($attach_id);
+
+		} // end if the file is correctly uploaded
+
+		// redirect to prevent resend
+		$location .= "?step=3&project_id=".$project_id."&feedback=file_uploaded";
+		wp_redirect( $location );
+		exit;
 
 	} else { // if user is not logged in
 			$location .= "?step=1&feedback=user";
@@ -380,6 +416,7 @@ function hce_project_upload_file() {
 	} // end if user is logged in
 
 } // end upload project file
+
 
 // display HCE form to evaluate a project
 function hce_form() {
@@ -736,7 +773,7 @@ function hce_form() {
 	return $form_out;
 } // end display HCE form to evaluate a project
 
-// createi or update emissions table in DB
+// create or update emissions table in DB
 global $emissions_ver;
 $emissions_ver = "0.1"; 
 function hce_db_emissions_table() {
@@ -767,8 +804,6 @@ function hce_db_emissions_table() {
 	dbDelta( $sql );
 
 	update_option( 'hce_emissions_version', $emissions_ver );
-
-	
 
 } // end create emissions table in DB
 
