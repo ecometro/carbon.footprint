@@ -870,7 +870,7 @@ function hce_form() {
 
 // create or update emissions table in DB
 global $emissions_ver;
-$emissions_ver = "0.1"; 
+$emissions_ver = "0.2"; 
 function hce_db_emissions_table() {
 	global $wpdb;
 	global $emissions_ver;
@@ -890,7 +890,7 @@ function hce_db_emissions_table() {
 	  opendap_code char(7) NOT NULL default '0000000',
 	  type varchar(200) NOT NULL default '',
 	  subtype varchar(200) NOT NULL default '',
-	  emission_factor float(10,10) NOT NULL default 0,
+	  emission_factor float(10,5) NOT NULL default 0,
 	  PRIMARY KEY  (id)
 	) $charset_collate;
 	";
@@ -904,7 +904,7 @@ function hce_db_emissions_table() {
 
 // create materials table in DB
 global $materials_ver;
-$materials_ver = "0.1";
+$materials_ver = "0.2";
 function hce_db_materials_table() {
 	global $wpdb;
 	global $materials_ver;
@@ -924,14 +924,14 @@ function hce_db_materials_table() {
 	  code varchar(20) NOT NULL default '',
 	  unit varchar(10) NOT NULL default '',
 	  basic_material varchar(200) NOT NULL default '',
-	  basic_material_mass float(10,10) NOT NULL default 0,
+	  basic_material_mass float(10,5) NOT NULL default 0,
 	  component_1 varchar(200) NOT NULL default '',
-	  component_1_mass float(10,10) NOT NULL default 0,
+	  component_1_mass float(10,5) NOT NULL default 0,
 	  component_2 varchar(200) NOT NULL default '',
-	  component_2_mass float(10,10) NOT NULL default 0,
+	  component_2_mass float(10,5) NOT NULL default 0,
 	  component_3 varchar(200) NOT NULL default '',
-	  component_3_mass float(10,10) NOT NULL default 0,
-	  dap_factor float(10,10) NOT NULL default 0,
+	  component_3_mass float(10,5) NOT NULL default 0,
+	  dap_factor float(10,5) NOT NULL default 0,
 	  PRIMARY KEY  (id)
 	) $charset_collate;
 	";
