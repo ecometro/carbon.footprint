@@ -52,8 +52,9 @@ function hce_theme_setup() {
 	// update custom tables structure in DB
 	add_action( 'init', 'hce_db_custom_tables_update', 99 );
 
-	// populate emissions table
+	// populate emissions and materials table
 	add_action( 'init', 'hce_db_emissions_table_populate', 100 );
+	add_action( 'init', 'hce_db_materials_table_populate', 100 );
 
 } // end hce theme setup function
 
@@ -949,19 +950,18 @@ function hce_db_materials_table() {
 		$charset_collate .= " COLLATE {$wpdb->collate}";
 	}
 	$table_name = $wpdb->prefix . "hce_materials"; 
-
 	$sql = "
 	CREATE TABLE $table_name (
 	  id bigint(20) unsigned NOT NULL auto_increment,
-	  code varchar(20) NOT NULL default '',
-	  unit varchar(10) NOT NULL default '',
-	  basic_material varchar(200) NOT NULL default '',
-	  basic_material_mass float(10,5) NOT NULL default 0,
-	  component_1 varchar(200) NOT NULL default '',
+	  material_code varchar(12) NOT NULL default '',
+	  material_name varchar(100) NOT NULL default '',
+	  material_unit varchar(10) NOT NULL default '',
+	  material_mass float(10,5) NOT NULL default 0,
+	  component_1 varchar(100) NOT NULL default '',
 	  component_1_mass float(10,5) NOT NULL default 0,
-	  component_2 varchar(200) NOT NULL default '',
+	  component_2 varchar(100) NOT NULL default '',
 	  component_2_mass float(10,5) NOT NULL default 0,
-	  component_3 varchar(200) NOT NULL default '',
+	  component_3 varchar(100) NOT NULL default '',
 	  component_3_mass float(10,5) NOT NULL default 0,
 	  dap_factor float(10,5) NOT NULL default 0,
 	  PRIMARY KEY  (id)
@@ -1059,6 +1059,101 @@ function hce_db_emissions_table_populate() {
 		} // end main loop
 		fclose($fp);
 		update_option( 'hce_emissions_data_version', $emissions_data_new_ver );
+
+	} else { // if data file do not exist
+		echo "<h2>Error</h2>
+			<p>File with contents not found or not accesible.</p>
+			<p>Check the path: " .$csv_filename. ". Maybe it has to be absolute...</p>";
+	} // end if file exist and is readable
+
+} // end populate emissions table
+
+// populate materials table
+function hce_db_materials_table_populate() {
+
+	global $wpdb;
+
+	$materials_data_current_ver = get_option( "hce_materials_data_version" );
+	// data file
+	$filename = HCE_BLOGTHEME. "/data/materiales.simples.csv"; // relative path to data filename
+	$line_length = "4096"; // max line lengh (increase in case you have longer lines than 1024 characters)
+	$delimiter = ","; // field delimiter character
+	$enclosure = '"'; // field enclosure character
+	
+	// open the data file
+	$fp = fopen($filename,'r');
+
+	if ( $fp !== FALSE ) { // if the file exists and is readable
+	
+		$table = $wpdb->prefix . "hce_materials";
+		$format = array(
+			//'%d',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s',
+			'%s'
+		);
+
+		$line = 0;
+		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
+			if ( $line == 0 ) { // check version
+				$materials_data_new_ver = $fp_csv[0];
+				if ( $materials_data_current_ver == $materials_data_new_ver ) { return; /* stop: current version is up to date */ }
+				else { /* empty table */ $wpdb->query( "TRUNCATE TABLE `$table`" ); }
+
+			} elseif ( $line == 1 ) { /* csv file headers */ }
+
+			else {
+				// preparing data to insert
+				$material_code = $fp_csv[0];
+				$material_mass = round($fp_csv[9],5);
+				$component1_mass = round($fp_csv[6],5);
+				$component2_mass = round($fp_csv[7],5);
+				$component3_mass = round($fp_csv[8],5);
+				$dap_factor = round($fp_csv[10],5);
+				$data = array(
+					//'id' => is autoincrement
+					'material_code' => $material_code,
+					'material_name' => $fp_csv[2],
+					'material_unit' => $fp_csv[1],
+					'material_mass' => $material_mass,
+					'component_1' => $fp_csv[3],
+					'component_1_mass' => $component1_mass,
+					'component_2' => $fp_csv[4],
+					'component_2_mass' => $component2_mass,
+					'component_3' => $fp_csv[5],
+					'component_3_mass' => $component3_mass,
+					'dap_factor' => $dap_factor
+				);
+//				$where = array(
+//					'material_code' => $material_code
+//				);
+				// query to know if there is already rows for this opendap code
+//				$select_query = "SELECT material_code FROM $table WHERE material_code='$material_code' LIMIT 1";
+//				$select = $wpdb->get_results($select_query,OBJECT_K);
+//				if ( array_key_exists($material_code,$select) ) { // if there is a row for this code
+//					if ( $select[$material_code]->emission_factor != $emission_factor ) {
+//						/* update row */ $wpdb->update( $table, $data, $where, $format );
+//					}
+
+//				} else { // if there is no row for this code
+					/* create row */ $wpdb->insert( $table, $data, $format );
+
+//				}
+
+			} // end if not line 0
+			$line++;
+
+		} // end main loop
+		fclose($fp);
+		update_option( 'hce_materials_data_version', $materials_data_new_ver );
 
 	} else { // if data file do not exist
 		echo "<h2>Error</h2>
