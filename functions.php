@@ -297,8 +297,23 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 	// data file
 	$filename = wp_get_attachment_url($csv_file_id); // relative path to data filename
 	$line_length = "4096"; // max line lengh (increase in case you have longer lines than 1024 characters)
-	$delimiter = ";"; // field delimiter character
-	$enclosure = ''; // field enclosure character
+	// separator character
+	if ( array_key_exists('hce-form-step2-delimiter', $_POST) ) { $delimiter = sanitize_text_field($_POST['hce-form-step2-delimiter']); }
+	else { $delimiter = ""; }
+	if ( $delimiter == '' ) { // if delimiter is not defined, error
+		// if there was a problem with CSV file, we try to delete it
+		if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
+		} else { delete_post_meta($project_id,$cfield_prefix.'csv_file'); }
+		$location .= "?step=2&project_id=".$project_id."&feedback=csv_delimiter";
+		wp_redirect($location);
+		exit;
+	}
+	// enclosure character
+	if ( array_key_exists('hce-form-step2-enclosure', $_POST) ) {
+		$enclosure = sanitize_text_field($_POST['hce-form-step2-enclosure']);
+		if ( $enclosure == "" ) { $enclosure = '"'; }
+	}
+	else { $enclosure = '"'; }
 	
 	// open the data file
 	$fp = fopen($filename,'r');
@@ -323,7 +338,7 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 		);
 
 		$line = 0;
-		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter)) !== FALSE ) { // begin main loop
+		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { /* csv file headers */ }
 			else {
 				// check  empty lines
@@ -569,6 +584,7 @@ function hce_form() {
 		elseif ( $form_feedback == 'wrong_user' ) { $feedback_type = "danger"; $feedback_text = "Algo no encaja: parece que tú no eres el autor del proyecto que intentas editar. Vuelve a empezar."; }
 		elseif ( $form_feedback == 'file_not_deleted' ) { $feedback_type = "danger"; $feedback_text = "Algo falló: el archivo de mediciones no se ha eliminado. Quizás quieras volver a intentarlo."; }
 		elseif ( $form_feedback == 'populate_table' ) { $feedback_type = "danger"; $feedback_text = "La información del archivo de mediciones no pudo incorporarse a la base de datos. Revisa la estructura del archivo e intenta volver a subirlo al servidor."; }
+		elseif ( $form_feedback == 'csv_delimiter' ) { $feedback_type = "danger"; $feedback_text = "Para poder subir el archivo CSV con las mediciones tienes que rellenar el campo separador, para que podamos procesar los datos del archivo."; }
 		elseif ( $form_feedback == 'user' ) { $feedback_type = "success"; $feedback_text = "Debes iniciar sesión para evaluar un proyecto."; }
 		elseif ( $form_feedback == 'project_inserted' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido guardados."; }
 		elseif ( $form_feedback == 'project_updated' ) { $feedback_type = "success"; $feedback_text = "Los datos del proyecto han sido actualizados."; }
@@ -754,7 +770,6 @@ function hce_form() {
 		// check if project has already a csv file uploaded
 		$csv_file_id = get_post_meta($project_id,'_hce_project_csv_file',true);
 		if ( $csv_file_id != '' ) {
-			$csv_file = get_post($csv_file_id);
 			$enctype_out = "";
 			$link_out = 'Ir al paso '.$next_step;
 			$submit_out = 'Sustituir archivo';
@@ -763,7 +778,10 @@ function hce_form() {
 			<fieldset class='form-group'>
 				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo de mediciones</label>
 				<div class='col-sm-5'>
-					<p>El archivo de mediciones asociado a este proyecto fue correctamente añadido y procesado.</p>
+					<div class='alert alert-info' role='alert'>
+					<p><strong>El archivo de mediciones de este proyecto ya fue añadido</strong> en algún momento, y sus datos procesados.</p>
+					<p><strong>Si quieres actualizar esos datos</strong> utiliza el botón rojo 'Sustituir archivo'. Ten en cuenta que esta opción eliminará los datos guardados actualmente, con excepción de los datos básicos del proyecto introducidos en el paso 1.</p>
+					</div>
 				</div>
 			</fieldset>
 			";		
@@ -774,12 +792,26 @@ function hce_form() {
 			$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
 			$fields_out = "
 			<fieldset class='form-group'>
-				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo de mediciones</label>
-				<div class='col-sm-5'>
+				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo CSV de mediciones <span class='glyphicon glyphicon-asterisk'></span></label>
+				<div class='col-sm-4'>
 					<input type='file' name='hce-form-step".$step."-csv' />
 					<input type='hidden' name='MAX_FILE_SIZE' value='40000' />
 				</div>
-				<p class='col-sm-4 help-block'><small>Formato CSV. Tamaño máximo 40kB.</small></p>
+				<p class='col-sm-5 help-block'><small><span class='glyphicon glyphicon-asterisk'></span> Campos requeridos.<br />Formato <abbr title='Comma Separated Values'>CSV</abbr>. Tamaño máximo 40kB.</small></p>
+			</fieldset>
+			<fieldset class='form-group'>
+				<label for='hce-form-step".$step."-delimiter' class='col-sm-3 control-label'>Caracter separador de campos del archivo CSV <span class='glyphicon glyphicon-asterisk'></span></label>
+				<div class='col-sm-1'>
+					<input maxlength='1' class='form-control' type='text' value='' name='hce-form-step".$step."-delimiter' />
+				</div>
+				<p class='col-sm-5 col-sm-offset-3 help-block'><small><strong>Indica dónde acaba un campo y empieza el siguiente</strong> en una línea del archivo CSV. Suele ser la coma, el punto y coma o el tabulador, pero puede ser cualquiera.</small></p>
+			</fieldset>
+			<fieldset class='form-group'>
+				<label for='hce-form-step".$step."-enclosure' class='col-sm-3 control-label'>Caracter delimitador de campos del archivo CSV</label>
+				<div class='col-sm-1'>
+					<input maxlength='1' class='form-control' type='text' value='' name='hce-form-step".$step."-enclosure' />
+				</div>
+				<p class='col-sm-5 col-sm-offset-3 help-block'><small><strong>Rodea cada campo, delimitándolo</strong>. Suele ser la comilla o la doble comilla, pero puede ser cualquiera. <strong>Hay archivos CSV que no utilizan caracter de cercado</strong> de los campos: si éste es el caso del archivo que vas a subir, deja este campo vacío.<br /><br /><strong>Por ejemplo</strong>, línea con separador <strong>punto y coma</strong>, y delimitador <strong>comilla simple</strong>:<br /><code>'Contenido del primer campo';'Contenido del segundo campo'</code></small></p>
 			</fieldset>
 			";
 
