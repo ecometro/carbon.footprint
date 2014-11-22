@@ -388,9 +388,104 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 
 } // end populate project table in DB
 
+// calculate CO2 emission for each material in the project table
+function hce_project_calculate_emissions($project_id) {
+	global $wpdb;
+	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
+	$table_m = $wpdb->prefix . "hce_materials";
+	$table_e = $wpdb->prefix . "hce_emissions";
+	$sql_query = "
+		SELECT
+		  p.id,
+		  p.material_amount,
+		  m.material_mass,
+		  m.component_1,
+		  m.component_1_mass,
+		  m.dap_factor,
+		  e.emission_factor
+		FROM $table_p p
+		LEFT JOIN $table_m m
+		  ON p.material_code = m.material_code
+		LEFT JOIN $table_e e
+		  ON m.component_1 = e.subtype
+		WHERE p.material_amount != 0
+		  AND m.component_1_mass != 0
+	UNION ALL
+		SELECT
+		  p.id,
+		  p.material_amount,
+		  m.material_mass,
+		  m.component_2,
+		  m.component_2_mass,
+		  m.dap_factor,
+		  e.emission_factor
+		FROM $table_p p
+		LEFT JOIN $table_m m
+		  ON p.material_code = m.material_code
+		LEFT JOIN $table_e e
+		  ON m.component_2 = e.subtype
+		WHERE p.material_amount != 0
+		  AND m.component_2_mass != 0
+	UNION ALL
+		SELECT
+		  p.id,
+		  p.material_amount,
+		  m.material_mass,
+		  m.component_3,
+		  m.component_3_mass,
+		  m.dap_factor,
+		  e.emission_factor
+		FROM $table_p p
+		LEFT JOIN $table_m m
+		  ON p.material_code = m.material_code
+		LEFT JOIN $table_e e
+		  ON m.component_3 = e.subtype
+		WHERE p.material_amount != 0
+		  AND m.component_3_mass != 0
+	";
+	$query_results = $wpdb->get_results( $sql_query , ARRAY_A );
+
+	$count = 0;
+	$emissions = array();
+	foreach ( $query_results as $material ) {
+		$count++;
+		$material_id = $material['id'];
+		// emission factor maths
+		if ( !array_key_exists($material_id,$emissions) ) {
+			$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
+		}
+		$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $material['emission_factor'];
+	}
+
+	$update_cases = array();
+	$update_where = array();
+	$update_ids = array();
+	foreach ( $emissions as $id => $emission ) {
+		if ( !array_key_exists(2,$emission) ) { $emission[2] = 0; }
+		if ( !array_key_exists(3,$emission) ) { $emission[3] = 0; }
+		$material_emission = ( $emission[1] + $emission[2] + $emission[3] ) * ( 1 - ( $emission[0] / ( pow(0.1,37) + $emission[0] ) ) ) + $emission[0];
+		if ( $material_emission != 0 ) {
+			array_push($update_cases,"WHEN ".$id." THEN '".$material_emission."'");
+			array_push($update_where,"%s");
+			array_push($update_ids,$id);
+		}
+	}
+	$update_cases = implode(" ", $update_cases);
+	$update_where = implode(", ", $update_where);
+	$query_update = "
+		UPDATE $table_p
+		SET emission = CASE id
+		  $update_cases
+		  END
+		WHERE id IN ($update_where)
+	";
+	$wpdb->query( $wpdb->prepare($query_update, $update_ids) );
+
+} // end calculate CO2 emission for each material in the project table
 
 // upload project file
 function hce_project_upload_file() {
+	global $wpdb;
 	$location = get_permalink();
 	$cfield_prefix = '_hce_project_';
 	$user_ID = get_current_user_id();
@@ -417,6 +512,8 @@ function hce_project_upload_file() {
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_not_deleted";
 			} else {
 				delete_post_meta($project_id,$cfield_prefix.'csv_file');
+				$table = $wpdb->prefix. "hce_project_" .$project_id;
+				/* empty project table */ $wpdb->query( "TRUNCATE TABLE `$table`" ); 
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_deleted";
 			}
 			wp_redirect($location);
@@ -508,6 +605,9 @@ function hce_project_upload_file() {
 
 				// populate project table with file data
 				hce_project_populate_table($project_id,$attach_id);
+
+				// calculate CO2 emission for each material in the project table
+				hce_project_calculate_emissions($project_id);
 
 			} // end if CSV has been inserted
 
