@@ -58,6 +58,45 @@ function hce_theme_setup() {
 
 } // end hce theme setup function
 
+// USER functions
+// display login form
+function hce_login_form() {
+	$login_action = HCE_BLOGURL."/wp-login.php";
+	$form_out = "
+	<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
+		<div class='form-horizontal col-md-12'>
+		<fieldset class='form-group'>
+			<label for='user_login' class='col-sm-3 control-label'>Nombre de usuario</label>
+			<div class='col-sm-5'>
+				<input id='user_login' class='form-control' type='text' value='' name='log' />
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_pass' class='col-sm-3 control-label'>Contraseña</label>
+			<div class='col-sm-5'>
+				<input id='user_pass' class='form-control' type='password' size='20' value='' name='pwd' />
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<div class='col-sm-offset-3 col-sm-3 checkbox'>
+				<label>
+					<input id='rememberme' type='checkbox' value='forever' name='rememberme' /> Recuérdame
+				</label>
+			</div>
+			<div class='col-sm-2'>
+				<div class='pull-right'>
+					<input id='wp-submit' class='btn btn-primary' type='submit' value='Iniciar sesión' name='wp-submit' />
+					<input type='hidden' value='".site_url( $_SERVER['REQUEST_URI'] )."' name='redirect_to' />
+				</div>
+    			</div>
+		</fieldset>
+		</div>
+	</form>
+	";
+	return $form_out;
+
+} // end display login form
+
 // set up media options
 function hce_media_options() {
 	/* Add theme support for post thumbnails (featured images). */
@@ -631,13 +670,31 @@ function hce_project_upload_file() {
 // display HCE form to evaluate a project
 function hce_form() {
 
+	if ( !is_user_logged_in() ) { // if user is logged in, then hce form
+		$login_form = hce_login_form();
+		return $login_form;
+	}
+
+	// form step
+	if ( array_key_exists('step', $_GET) ) { $step = sanitize_text_field($_GET['step']); }
+	else { $step = 1; }
+
+	// actions depending on step
+	if ( $step == 2 && array_key_exists('hce-form-step-submit',$_POST) ) {
+		// insert project basic data
+		hce_project_insert_basic_data();
+
+	} // end step 2 actions
+	elseif ( $step == 3 && array_key_exists('hce-form-step-submit',$_POST ) ) {
+		// upload project file
+		hce_project_upload_file();
+	} // end step 3 actions
+
 	$last_step = 3;
 	$location = get_permalink();
 	$user_ID = get_current_user_id();
 
 	// form step and current project id
-	if ( array_key_exists('step', $_GET) ) { $step = sanitize_text_field($_GET['step']); }
-	else { $step = 1; }
 	if ( array_key_exists('project_id', $_GET) ) {
 		$project_id = sanitize_text_field($_GET['project_id']);
 		$project = get_post($project_id,ARRAY_A);
