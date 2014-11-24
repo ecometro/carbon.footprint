@@ -431,8 +431,11 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 } // end populate project table in DB
 
 // calculate CO2 emission for each material in the project table
+// insert emission in project table AND
+// insert top ten heaviest subtypes in postmeta table
 function hce_project_calculate_emissions($project_id) {
 	global $wpdb;
+	$cfield_prefix = '_hce_project_';
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
 	$table_m = $wpdb->prefix . "hce_materials";
 	$table_e = $wpdb->prefix . "hce_emissions";
@@ -489,6 +492,7 @@ function hce_project_calculate_emissions($project_id) {
 
 	$count = 0;
 	$emissions = array();
+	$weight = array();
 	foreach ( $query_results as $material ) {
 		$count++;
 		$material_id = $material['id'];
@@ -497,6 +501,22 @@ function hce_project_calculate_emissions($project_id) {
 			$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
 		}
 		$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $material['emission_factor'];
+
+		// weight of subtypes array
+		if ( !array_key_exists($material['component_1'],$weight) ) {
+			$weight[$material['component_1']] = $material['material_amount'] * $material['component_1_mass'];
+		} else {
+			$weight[$material['component_1']] += $material['material_amount'] * $material['material_mass'];
+		}
+	}
+
+	// sort subtypes: heaviest to lightest
+	arsort($weight);
+	// select top ten
+	$weight_topten = array_slice($weight, 0, 10, true);
+	foreach ( $weight_topten as $subtype => $kg ) {
+		$subtype_weight = array($subtype,$kg);
+		add_post_meta($project_id, $cfield_prefix.'weight_topten', $subtype_weight, false);
 	}
 
 	$update_cases = array();
