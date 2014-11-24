@@ -692,6 +692,7 @@ function hce_project_upload_file() {
 
 // display HCE form to evaluate a project
 function hce_form() {
+	$cfield_prefix = '_hce_project_';
 
 	if ( !is_user_logged_in() ) { // if user is logged in, then hce form
 		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_GET['redirect_to']); }
@@ -784,7 +785,6 @@ function hce_form() {
 		if ( $project_id != 0 ) { // if project_id is defined
 			$value['name'] = get_the_title($project_id);
 			$value_desc = $project['post_content'];
-			$cfield_prefix = '_hce_project_';
 			foreach ( $field_names as $field_name ) {
 				$value[$field_name] = get_post_meta($project_id,$cfield_prefix.$field_name,TRUE);
 			}
@@ -1003,33 +1003,46 @@ function hce_form() {
 	}
 	// in step 3
 	elseif ( $step == 3 ) {
+		$topten = get_post_meta($project_id,$cfield_prefix."weight_topten");
 		$enctype_out = "";
 		$submit_out = "Calcular emisiones";
 		$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
 		$distances_out = "
-			<option value=''>Distancia</option>
+			<option value=''></option>
 			<option value='200'>Local (200 km)</option>
 			<option value='800'>Nacional (800 km)</option>
 			<option value='2500'>Europea (2500 km)</option>
 			<option value='8000'>Internacional (8000 km)</option>
 		"; 
 		$types_out = "
-			<option value=''>Medio</option>
+			<option value=''></option>
 			<option value=''>Barco de carga</option>
 			<option value=''>Tren de carga</option>
 			<option value=''>Transporte por carretera</option>
 		";
+		echo "<pre>";print_r($topten);echo "</pre>";
+		$tt_count = 0;
 		$fields_out = "
 		<fieldset class='form-group'>
-			<label for='hce-form-step".$step."-desc' class='col-sm-3 control-label'>Tipo material</label>
-			<div class='col-sm-2'>
-				<select class='form-control' name='hce-form-step".$step."-transport-distance'>".$distances_out."</select>
-			</div>
-			<div class='col-sm-3'>
-				<select class='form-control' name='hce-form-step".$step."-transport-type'>".$types_out."</select>
-			</div>
+			<div class='col-sm-3 textr'><strong>Material</strong></div>
+			<div class='col-sm-2'><strong>Distancia</strong></div>
+			<div class='col-sm-3'><strong>Medio</strong></div>
 		</fieldset>
 		";
+		foreach ( $topten as $tt ) {
+			$tt_count++;
+			$fields_out .= "
+			<fieldset class='form-group'>
+				<div class='col-sm-3 textr'>".$tt[0]."</div>
+				<div class='col-sm-2'>
+					<select class='form-control' name='hce-form-step".$step."-transport-distance-".$tt_count."'>".$distances_out."</select>
+				</div>
+				<div class='col-sm-3'>
+					<select class='form-control' name='hce-form-step".$step."-transport-type-".$tt_count."'>".$types_out."</select>
+				</div>
+			</fieldset>
+			";
+		}
 	}
 	// END WHAT TO SHOW
 
