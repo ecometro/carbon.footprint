@@ -45,6 +45,9 @@ function hce_theme_setup() {
 	// disable admin bar in front end
 	add_filter('show_admin_bar', '__return_false');
 
+	// filter loops
+	add_filter( 'pre_get_posts', 'hce_filter_loops' );
+
 	// create custom tables in DB
 	add_action('after_switch_theme', 'hce_db_materials_table');
 	add_action('after_switch_theme', 'hce_db_emissions_table');
@@ -60,7 +63,7 @@ function hce_theme_setup() {
 
 // USER functions
 // display login form
-function hce_login_form() {
+function hce_login_form( $redirect_url = '' ) {	
 	$login_action = HCE_BLOGURL."/wp-login.php";
 	$form_out = "
 	<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
@@ -86,7 +89,7 @@ function hce_login_form() {
 			<div class='col-sm-2'>
 				<div class='pull-right'>
 					<input id='wp-submit' class='btn btn-primary' type='submit' value='Iniciar sesión' name='wp-submit' />
-					<input type='hidden' value='".site_url( $_SERVER['REQUEST_URI'] )."' name='redirect_to' />
+					<input type='hidden' value='".$redirect_url."' name='redirect_to' />
 				</div>
     			</div>
 		</fieldset>
@@ -671,7 +674,9 @@ function hce_project_upload_file() {
 function hce_form() {
 
 	if ( !is_user_logged_in() ) { // if user is logged in, then hce form
-		$login_form = hce_login_form();
+		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_GET['redirect_to']); }
+		else { $redirect_url = site_url( $_SERVER['REQUEST_URI'] ); }
+		$login_form = hce_login_form($redirect_url);
 		return $login_form;
 	}
 
@@ -1319,4 +1324,20 @@ function hce_db_materials_table_populate() {
 	} // end if file exist and is readable
 
 } // end populate emissions table
+
+// filter loops
+function hce_filter_loops( $query ) {
+//	false == $query->query_vars['suppress_filters'] 
+	if ( !is_admin() && is_author() && $query->is_main_query() ) {
+		$query->set('post_type',array('project')); 
+		global $current_user;
+		get_currentuserinfo();
+		if ( is_user_logged_in() && $current_user->user_login == $query->query_vars['author_name'] ) {
+			$query->set( 'post_status','any' );
+		} else { $query->set( 'post_status','publish' ); }
+
+	}
+	return $query;
+
+} // end filter loops
 ?>
