@@ -713,13 +713,17 @@ function hce_project_emission_transport() {
 		}
 
 		// check if all required fields are not empty
-
 		// save form values as project custom fields
 		$fields_to_save = array('distance','type');
 		foreach ( $fields_to_save as $field ) {
 			$save_count = 1;
 			while ( $save_count <= 10 ) {
 				$value = sanitize_text_field($_POST['hce-form-step3-transport-'.$field."-".$save_count]);
+				if ( $value == '' ) {
+					$location .= "?step=3&project_id=".$project_id."&feedback=required_field";
+					wp_redirect($location);
+					exit;
+				}
 				update_post_meta($project_id, $cfield_prefix.'transport_'.$field.'-'.$save_count, $value);
 				$save_count++;
 			}
