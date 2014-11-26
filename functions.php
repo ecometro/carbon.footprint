@@ -516,8 +516,8 @@ function hce_project_calculate_emissions($project_id) {
 	// select top ten
 	$weight_topten = array_slice($weight, 0, 10, true);
 	foreach ( $weight_topten as $subtype => $kg ) {
-		$subtype_weight = array($subtype,$kg);
-		add_post_meta($project_id, $cfield_prefix.'weight_topten', $subtype_weight, false);
+		//$subtype_weight = array($subtype,$kg);
+		add_post_meta($project_id, $cfield_prefix.'mass_topten', $subtype, false);
 	}
 
 	$update_cases = array();
@@ -690,6 +690,37 @@ function hce_project_upload_file() {
 
 } // end upload project file
 
+// calculate transport emission for top ten subtypes
+function hce_project_emission_transport() {
+	global $wpdb;
+	$location = get_permalink();
+	$cfield_prefix = '_hce_project_';
+	$user_ID = get_current_user_id();
+
+	if ( $user_ID != 0 ) { // if user is logged in
+		if ( array_key_exists('project_id', $_GET) ) { $project_id = sanitize_text_field($_GET['project_id']); }
+		else { $project_id = 0; }
+		$project = get_post($project_id);
+		if ( $project->post_author != $user_ID ) { // if current user is not the author
+				$location .= "?step=1&feedback=wrong_user";
+				wp_redirect($location);
+				exit;
+
+		} elseif ( $project->ID != $project_id ) { // if project does not exist yet
+				$location .= "?step=1&feedback=project";
+				wp_redirect($location);
+				exit;
+		}
+
+
+	} else { // if user is not logged in
+			$location .= "?step=1&feedback=user";
+			wp_redirect($location);
+			exit;
+
+	} // end if user is logged in
+
+} // end calculate transport emission for top ten subtypes
 
 // display HCE form to evaluate a project
 function hce_form() {
@@ -709,15 +740,22 @@ function hce_form() {
 	// actions depending on step
 	if ( $step == 2 && array_key_exists('hce-form-step-submit',$_POST) ) {
 		// insert project basic data
+		// create project table
 		hce_project_insert_basic_data();
 
 	} // end step 2 actions
 	elseif ( $step == 3 && array_key_exists('hce-form-step-submit',$_POST ) ) {
 		// upload project file
+		// populate project table
+		// do emissions maths and insert emissions in project table
 		hce_project_upload_file();
 	} // end step 3 actions
+	elseif ( $step == 4 && array_key_exists('hce-form-step-submit',$_POST ) ) {
+		// do transport emissions maths and insert emissions in project table
+		hce_project_emission_transport();
+	} // end step 4 actions
 
-	$last_step = 3;
+	$last_step = 4;
 	$location = get_permalink();
 	$user_ID = get_current_user_id();
 
@@ -747,7 +785,7 @@ function hce_form() {
 	}
 
 	// prev and next steps links
-	if ( $step == $last_step ) { $action_next = ""; } else {
+	if ( $step == $last_step ) { $action_next = get_permalink($project_id)."?referer=form"; } else {
 		$next_step = $step + 1;
 		$action_next = $location."?step=".$next_step;
 		if ( $project_id != 0 ) { $action_next .= "&project_id=".$project_id; }
@@ -1007,7 +1045,7 @@ function hce_form() {
 		$topten = get_post_meta($project_id,$cfield_prefix."weight_topten");
 		$enctype_out = "";
 		$submit_out = "Calcular emisiones";
-		$next_step_out = "<input class='btn btn-primary ' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
+		$next_step_out = "<input class='btn btn-primary' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
 		$distances_out = "
 			<option value=''></option>
 			<option value='200'>Local (200 km)</option>
@@ -1044,6 +1082,11 @@ function hce_form() {
 			";
 		}
 	}
+	// in step 4
+	elseif ( $step == 4 ) {
+		$submit_out = "Ver informe de emisiones";
+		$next_step_out = "<a class='btn btn-primary' href='".$action_next."'>".$submit_out."</a>";
+	}
 	// END WHAT TO SHOW
 
 	// steps nav menu
@@ -1064,8 +1107,15 @@ function hce_form() {
 			'step' => 3,
 			'status' => " btn-default",
 			'text' => "Transporte",
+			'after' => " <span class='glyphicon glyphicon-chevron-right'></span> "
+		),
+		array(
+			'step' => 4,
+			'status' => " btn-default",
+			'text' => "Resultado",
 			'after' => ""
 		),
+
 	);
 	$nav_btns_out = "<strong>Pasos:</strong> ";
 	reset($btns);
@@ -1075,24 +1125,49 @@ function hce_form() {
 	}
 
 	// form output
-	$form_out = "
-	<div class='row'>
-		<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
-		<div class='col-sm-3'>".$feedback_out."</div>
-	</div>
-
-	<form class='row' id='hce-form-step".$step."' method='post' action='" .$action_next. "'" .$enctype_out. ">
-		<div class='form-horizontal col-md-12'>
-		".$fields_out."
-		<fieldset class='form-group'>
-			<div class='col-sm-offset-3 col-sm-5'>
-				".$prev_step_out."
-				<div class='pull-right'>".$next_step_out."</div>
-    			</div>
-		</fieldset>
+	if ( $step == 4 ) {
+		$form_out = "
+		<div class='row'>
+			<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
 		</div>
-	</form>
-	";
+	
+		<div class='row'>
+			<div class='col-sm-offset-3 col-sm-5'>
+				<div class='alert alert-info' role='alert'>
+					<p><strong>El proceso de cálculo de las emisiones de CO2 de tu proyecto se ha completado.</strong></p>
+					<p>¡Enhorabuena! Y gracias por usar la herramienta arCO2.</p>
+				</div>
+			</div>
+		</div>
+		<div class='row'>
+			<div class='col-sm-offset-3 col-sm-5'>
+					".$prev_step_out."
+					<div class='pull-right'>".$next_step_out."</div>
+	    			</div>
+			</div>
+		</div>
+		";
+
+	} else {
+		$form_out = "
+		<div class='row'>
+			<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
+			<div class='col-sm-3'>".$feedback_out."</div>
+		</div>
+	
+		<form class='row' id='hce-form-step".$step."' method='post' action='" .$action_next. "'" .$enctype_out. ">
+			<div class='form-horizontal col-sm-12'>
+			".$fields_out."
+			<fieldset class='form-group'>
+				<div class='col-sm-offset-3 col-sm-5'>
+					".$prev_step_out."
+					<div class='pull-right'>".$next_step_out."</div>
+	    			</div>
+			</fieldset>
+			</div>
+		</form>
+		";
+	}
 	return $form_out;
 } // end display HCE form to evaluate a project
 
