@@ -434,61 +434,130 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 // calculate CO2 emission for each material in the project table
 // insert emission in project table AND
 // insert top ten heaviest subtypes in postmeta table
-function hce_project_calculate_emissions($project_id) {
+function hce_project_calculate_emissions($project_id,$emission_type) {
 	global $wpdb;
 	$cfield_prefix = '_hce_project_';
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
 	$table_m = $wpdb->prefix . "hce_materials";
 	$table_e = $wpdb->prefix . "hce_emissions";
-	$sql_query = "
-		SELECT
-		  p.id,
-		  p.material_amount,
-		  m.material_mass,
-		  m.component_1,
-		  m.component_1_mass,
-		  m.dap_factor,
-		  e.emission_factor
-		FROM $table_p p
-		LEFT JOIN $table_m m
-		  ON p.material_code = m.material_code
-		LEFT JOIN $table_e e
-		  ON m.component_1 = e.subtype
-		WHERE p.material_amount != 0
-		  AND m.component_1_mass != 0
-	UNION ALL
-		SELECT
-		  p.id,
-		  p.material_amount,
-		  m.material_mass,
-		  m.component_2,
-		  m.component_2_mass,
-		  m.dap_factor,
-		  e.emission_factor
-		FROM $table_p p
-		LEFT JOIN $table_m m
-		  ON p.material_code = m.material_code
-		LEFT JOIN $table_e e
-		  ON m.component_2 = e.subtype
-		WHERE p.material_amount != 0
-		  AND m.component_2_mass != 0
-	UNION ALL
-		SELECT
-		  p.id,
-		  p.material_amount,
-		  m.material_mass,
-		  m.component_3,
-		  m.component_3_mass,
-		  m.dap_factor,
-		  e.emission_factor
-		FROM $table_p p
-		LEFT JOIN $table_m m
-		  ON p.material_code = m.material_code
-		LEFT JOIN $table_e e
-		  ON m.component_3 = e.subtype
-		WHERE p.material_amount != 0
-		  AND m.component_3_mass != 0
-	";
+	if ( $emission_type == 'intrinsic' ) {
+		$col_to_update = "emission";
+		$sql_query = "
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_1,
+			  m.component_1_mass,
+			  m.dap_factor,
+			  e.emission_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			LEFT JOIN $table_e e
+			  ON m.component_1 = e.subtype
+			WHERE p.material_amount != 0
+			  AND m.component_1_mass != 0
+		UNION ALL
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_2,
+			  m.component_2_mass,
+			  m.dap_factor,
+			  e.emission_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			LEFT JOIN $table_e e
+			  ON m.component_2 = e.subtype
+			WHERE p.material_amount != 0
+			  AND m.component_2_mass != 0
+		UNION ALL
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_3,
+			  m.component_3_mass,
+			  m.dap_factor,
+			  e.emission_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			LEFT JOIN $table_e e
+			  ON m.component_3 = e.subtype
+			WHERE p.material_amount != 0
+			  AND m.component_3_mass != 0
+		";
+
+	} elseif ( $emission_type == 'transport' ) {
+		$col_to_update = "emission_transport";
+		$topten = get_post_meta($project_id,$cfield_prefix."mass_topten");
+		$select_where = "";
+		foreach ( $topten as $tt ) { $select_where .= "'".$tt."', "; }
+		$select_where = substr($select_where,0,-2);
+		$sql_query = "
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_1,
+			  m.component_1_mass,
+			  m.dap_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			WHERE p.material_amount != 0
+			  AND m.component_1_mass != 0
+			  AND m.component_1 IN ($select_where)
+		UNION ALL
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_2,
+			  m.component_2_mass,
+			  m.dap_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			WHERE p.material_amount != 0
+			  AND m.component_2_mass != 0
+			  AND m.component_2 IN ($select_where)
+		UNION ALL
+			SELECT
+			  p.id,
+			  p.material_amount,
+			  m.material_mass,
+			  m.component_3,
+			  m.component_3_mass,
+			  m.dap_factor
+			FROM $table_p p
+			LEFT JOIN $table_m m
+			  ON p.material_code = m.material_code
+			WHERE p.material_amount != 0
+			  AND m.component_3_mass != 0
+			  AND m.component_3 IN ($select_where)
+		";
+
+		// prepare topten $_POST data
+		$topten_fields = array('subtype','distance','type');
+		$topten_data = array();
+		$w_count = 1;
+		while ( $w_count <= 10 ) {
+			$key = sanitize_text_field($_POST['hce-form-step3-transport-'.$topten_fields[0]."-".$w_count]);
+			$distance = sanitize_text_field($_POST['hce-form-step3-transport-'.$topten_fields[1]."-".$w_count]);
+			$type = sanitize_text_field($_POST['hce-form-step3-transport-'.$topten_fields[2]."-".$w_count]);
+			$topten_data[$key] = array(
+				'distance' => $distance,
+				'emission' => $type
+			);
+			$w_count++;
+		}
+
+	} // end if emission type
 	$query_results = $wpdb->get_results( $sql_query , ARRAY_A );
 
 	$count = 0;
@@ -497,36 +566,54 @@ function hce_project_calculate_emissions($project_id) {
 	foreach ( $query_results as $material ) {
 		$count++;
 		$material_id = $material['id'];
-		// emission factor maths
-		if ( !array_key_exists($material_id,$emissions) ) {
-			$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
-		}
-		$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $material['emission_factor'];
 
-		// weight of subtypes array
-		if ( !array_key_exists($material['component_1'],$weight) ) {
-			$weight[$material['component_1']] = $material['material_amount'] * $material['component_1_mass'];
-		} else {
-			$weight[$material['component_1']] += $material['material_amount'] * $material['material_mass'];
-		}
+		if ( $emission_type == 'intrinsic' ) {
+			// emission maths
+			if ( !array_key_exists($material_id,$emissions) ) {
+				$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
+			}
+			$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $material['emission_factor'];
+
+			// weight of subtypes array
+			if ( !array_key_exists($material['component_1'],$weight) ) {
+				$weight[$material['component_1']] = $material['material_amount'] * $material['component_1_mass'];
+			} else {
+				$weight[$material['component_1']] += $material['material_amount'] * $material['material_mass'];
+			}
+			
+		} elseif ( $emission_type == 'transport' ) {
+			$material_subtype = $material['component_1'];
+			// emission maths
+			if ( !array_key_exists($material_id,$emissions) ) {
+				if ( $material['dap_factor'] == 0 ) { $emissions[$material_id][] = 0; }
+				else { $emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $topten_data[$material_subtype]['emission'] * $topten_data[$material_subtype]['distance']; }
+			}
+				$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $topten_data[$material_subtype]['emission'] * $topten_data[$material_subtype]['distance'];
+
+		} // end if emission type
+
 	}
 
 	// sort subtypes: heaviest to lightest
-	arsort($weight);
-	// select top ten
-	$weight_topten = array_slice($weight, 0, 10, true);
-	foreach ( $weight_topten as $subtype => $kg ) {
-		//$subtype_weight = array($subtype,$kg);
-		add_post_meta($project_id, $cfield_prefix.'mass_topten', $subtype, false);
+	if ( $emission_type == 'intrinsic' ) {
+		arsort($weight);
+		// select top ten
+		$weight_topten = array_slice($weight, 0, 10, true);
+		foreach ( $weight_topten as $subtype => $kg ) {
+			add_post_meta($project_id, $cfield_prefix.'mass_topten', $subtype, false);
+		}
 	}
 
 	$update_cases = array();
 	$update_where = array();
 	$update_ids = array();
 	foreach ( $emissions as $id => $emission ) {
-		if ( !array_key_exists(2,$emission) ) { $emission[2] = 0; }
-		if ( !array_key_exists(3,$emission) ) { $emission[3] = 0; }
-		$material_emission = ( $emission[1] + $emission[2] + $emission[3] ) * ( 1 - ( $emission[0] / ( pow(0.1,37) + $emission[0] ) ) ) + $emission[0];
+		if ( $emission[0] == 0 ) { // if there is no DAP, then take three subtypes
+			if ( !array_key_exists(2,$emission) ) { $emission[2] = 0; }
+			if ( !array_key_exists(3,$emission) ) { $emission[3] = 0; }
+			$material_emission = ( $emission[1] + $emission[2] + $emission[3] );
+		} else { /* if there is DAP, then ignore three subtypes */ $material_emission = $emission[0]; }
+
 		if ( $material_emission != 0 ) {
 			array_push($update_cases,"WHEN ".$id." THEN '".$material_emission."'");
 			array_push($update_where,"%s");
@@ -537,7 +624,7 @@ function hce_project_calculate_emissions($project_id) {
 	$update_where = implode(", ", $update_where);
 	$query_update = "
 		UPDATE $table_p
-		SET emission = CASE id
+		SET $col_to_update = CASE id
 		  $update_cases
 		  END
 		WHERE id IN ($update_where)
@@ -670,7 +757,7 @@ function hce_project_upload_file() {
 				hce_project_populate_table($project_id,$attach_id);
 
 				// calculate CO2 emission for each material in the project table
-				hce_project_calculate_emissions($project_id);
+				hce_project_calculate_emissions($project_id,'intrinsic');
 
 			} // end if CSV has been inserted
 
@@ -728,6 +815,9 @@ function hce_project_emission_transport() {
 				$save_count++;
 			}
 		}
+
+		// calculate transport CO2 emissions for each material in the top ten
+		hce_project_calculate_emissions($project_id,'transport');
 
 	} else { // if user is not logged in
 			$location .= "?step=1&feedback=user";
@@ -1101,7 +1191,10 @@ function hce_form() {
 			}
 			$fields_out .= "
 			<fieldset class='form-group'>
-				<div class='col-sm-3 textr'>".$tt." <span class='glyphicon glyphicon-asterisk'></span></div>
+				<div class='col-sm-3 textr'>
+					".$tt." <span class='glyphicon glyphicon-asterisk'></span>
+					<input type='hidden' name='hce-form-step".$step."-transport-subtype-".$tt_count."' value='".$tt."' />
+				</div>
 				<div class='col-sm-2'>
 					<select class='form-control' name='hce-form-step".$step."-transport-distance-".$tt_count."'>".$distances_out."</select>
 				</div>
