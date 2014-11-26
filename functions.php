@@ -1236,7 +1236,11 @@ function hce_db_emissions_table_populate() {
 					'opendap_code' => $opendap_code
 				);
 				// query to know if there is already rows for this opendap code
-				$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE opendap_code='$opendap_code' LIMIT 1";
+				if ( $opendap_code == '' ) { // if subtype has no opendap code, then take subtype to know if there is already a row
+					$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE subtype='{$fp_csv[1]}' LIMIT 1";
+				} else {
+					$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE opendap_code='$opendap_code' LIMIT 1";
+				}
 				$select = $wpdb->get_results($select_query,OBJECT_K);
 				if ( array_key_exists($opendap_code,$select) ) { // if there is a row for this code
 					if ( $select[$opendap_code]->emission_factor != $emission_factor ) {
