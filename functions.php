@@ -712,6 +712,18 @@ function hce_project_emission_transport() {
 				exit;
 		}
 
+		// check if all required fields are not empty
+
+		// save form values as project custom fields
+		$fields_to_save = array('distance','type');
+		foreach ( $fields_to_save as $field ) {
+			$save_count = 1;
+			while ( $save_count <= 10 ) {
+				$value = sanitize_text_field($_POST['hce-form-step3-transport-'.$field."-".$save_count]);
+				update_post_meta($project_id, $cfield_prefix.'transport_'.$field.'-'.$save_count, $value);
+				$save_count++;
+			}
+		}
 
 	} else { // if user is not logged in
 			$location .= "?step=1&feedback=user";
@@ -1042,23 +1054,20 @@ function hce_form() {
 	}
 	// in step 3
 	elseif ( $step == 3 ) {
-		$topten = get_post_meta($project_id,$cfield_prefix."weight_topten");
+		global $wpdb;
+		$table_e = $wpdb->prefix . "hce_emissions";
+		$select_query = "SELECT emission_factor,subtype FROM $table_e WHERE type='TRANSPORTE'";
+		$types = $wpdb->get_results($select_query,OBJECT_K);
+		$topten = get_post_meta($project_id,$cfield_prefix."mass_topten");
 		$enctype_out = "";
 		$submit_out = "Calcular emisiones";
 		$next_step_out = "<input class='btn btn-primary' type='submit' value='".$submit_out."' name='hce-form-step-submit' /> <span class='glyphicon glyphicon-chevron-right'></span>";
-		$distances_out = "
-			<option value=''></option>
-			<option value='200'>Local (200 km)</option>
-			<option value='800'>Nacional (800 km)</option>
-			<option value='2500'>Europea (2500 km)</option>
-			<option value='8000'>Internacional (8000 km)</option>
-		"; 
-		$types_out = "
-			<option value=''></option>
-			<option value=''>Barco de carga</option>
-			<option value=''>Tren de carga</option>
-			<option value=''>Transporte por carretera</option>
-		";
+		$distances = array(
+			'200' => 'Local (200 km)',
+			'800' => 'Nacional (800 km)',
+			'2500' => 'Europea (2500 km)',
+			'8000' => 'Internacional (8000 km)'
+		);
 		$tt_count = 0;
 		$fields_out = "
 		<fieldset class='form-group'>
@@ -1069,15 +1078,33 @@ function hce_form() {
 		";
 		foreach ( $topten as $tt ) {
 			$tt_count++;
+			if ( $tt_count == 1 ) {
+			$help = "<p class='col-sm-4 help-block'><small><span class='glyphicon glyphicon-asterisk'></span> Campos requeridos.</small></p>";
+			} else { $help = ""; }
+			$current_distance = get_post_meta($project_id,$cfield_prefix."transport_distance-".$tt_count,TRUE);
+			$distances_out = "<option value=''></option>";
+			foreach ( $distances as $value => $text ) {
+				if ( $value == $current_distance ) { $selected = " selected"; }
+				else { $selected = "";}
+				$distances_out .= "<option value='".$value."'".$selected.">".$text."</option>";
+			}
+			$current_type = get_post_meta($project_id,$cfield_prefix."transport_type-".$tt_count,TRUE);
+			$types_out = "<option value=''></option>";
+			foreach ( $types as $value => $text ) {
+				if ( $value == $current_type ) { $selected = " selected"; }
+				else { $selected = "";}
+				$types_out .= "<option value='".$text->emission_factor."'".$selected.">".$text->subtype."</option>";
+			}
 			$fields_out .= "
 			<fieldset class='form-group'>
-				<div class='col-sm-3 textr'>".$tt[0]."</div>
+				<div class='col-sm-3 textr'>".$tt." <span class='glyphicon glyphicon-asterisk'></span></div>
 				<div class='col-sm-2'>
 					<select class='form-control' name='hce-form-step".$step."-transport-distance-".$tt_count."'>".$distances_out."</select>
 				</div>
 				<div class='col-sm-3'>
 					<select class='form-control' name='hce-form-step".$step."-transport-type-".$tt_count."'>".$types_out."</select>
 				</div>
+				".$help."
 			</fieldset>
 			";
 		}
