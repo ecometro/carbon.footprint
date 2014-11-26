@@ -321,6 +321,7 @@ function hce_project_create_table($project_id) {
 	  subsection_code varchar(12) NOT NULL default '',
 	  subsection_name varchar(100) NOT NULL default '',
 	  emission float(10,5) NOT NULL default 0,
+	  emission_transport float(10,5) NOT NULL default 0,
 	  PRIMARY KEY  (id)
 	) $charset_collate;
 	";
@@ -1020,7 +1021,6 @@ function hce_form() {
 			<option value=''>Tren de carga</option>
 			<option value=''>Transporte por carretera</option>
 		";
-		echo "<pre>";print_r($topten);echo "</pre>";
 		$tt_count = 0;
 		$fields_out = "
 		<fieldset class='form-group'>
