@@ -1,83 +1,18 @@
 <?php get_header();
 
 if ( have_posts() ) { while ( have_posts() ) : the_post();
+	$project_id = $post->ID;
+
+	// visibility switcher
 	$visibility_switcher_out = hce_project_visibility_switcher();
 
-	$project_id = $post->ID;
+	// edit project link
+	if ( is_user_logged_in() && get_current_user_id() == $post->post_author ) {
+		$edit_link_out = "<p><a class='btn btn-default btn-xs' href='/calculo-huella-carbono/?step=1&project_id=".$post->ID."'>Editar proyecto</a></p>";
+	} else { $edit_link_out = ""; }
+
 	// get project basic data
-	$cfield_prefix = '_hce_project_';
-	$cfields_basic = array("address","city","state","cp","use","built-area","useful-area","adjusted-area","users","budget","energy-label","energy-consumption","co2-emission");
-	$value['name'] = get_the_title();
-	foreach ( $cfields_basic as $field ) {
-		$value[$field] = get_post_meta($project_id,$cfield_prefix.$field,TRUE);
-	}
-	$value['desc'] = get_the_content();
-	$basic_fields = array(
-		array(
-			'label' => 'Nombre del proyecto',
-			'unit' => '',
-			'value' => $value['name']
-		),
-		array(
-			'label' => 'Localización',
-			'unit' => '',
-			'value' => $value['address']. ", " .$value['city']. ". " .$value['cp']. " " .$value['state']
-		),
-		array(
-			'label' => 'Uso',
-			'unit' => '',
-			'value' => $value['use']
-		),
-		array(
-			'label' => 'Superficie construida',
-			'unit' => 'm2',
-			'value' => $value['built-area']
-		),
-		array(
-			'label' => 'Superficie útil',
-			'unit' => 'm2',
-			'value' => $value['useful-area']
-		),
-		array(
-			'label' => 'Superficie computable',
-			'unit' => 'm2',
-			'value' => $value['adjusted-area']
-		),
-		array(
-			'label' => 'Número de usuarios',
-			'unit' => '',
-			'value' => $value['users']
-		),
-		array(
-			'label' => 'Presupuesto',
-			'unit' => '€',
-			'value' => $value['budget']
-		),
-		array(
-			'label' => 'Calificación energética',
-			'unit' => '',
-			'value' => $value['energy-label']
-		),
-		array(
-			'label' => 'Consumo energético anual',
-			'unit' => 'kWh/m2 año',
-			'value' => $value['energy-consumption']
-		),
-		array(
-			'label' => 'Emisión anual de CO2',
-			'unit' => 'Kg CO2/m2 año',
-			'value' => $value['co2-emission']
-		),
-		array(
-			'label' => 'Descripción',
-			'unit' => '',
-			'value' => $value['desc']
-		)
-	);
-	$basic_fields_out = "";
-	foreach ( $basic_fields as $field ) {
-		$basic_fields_out .= "<dt>".$field['label']."</dt><dd>".$field['value']." ".$field['unit']."</dd>";
-	}
+	$basic_fields_out = hce_project_display_basic_data($project_id);
 
 	// calculate emissions
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
@@ -112,7 +47,6 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 //print_r($emissions);
 //echo "</pre>";
 //echo $emissions_total;
-	// emission per building user
 	$emission_per_section_out = "
 	<div class='dossier-table-header row'>
 		<div class='col-sm-4'><small>CAPÍTULO</small><div class='pull-right'><small>kg CO2 eq</small></div></div>
@@ -156,14 +90,14 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 
 <main class="row" role="main">
 	<div id="dossier-meta" class="col-sm-2">
-		<?php echo $visibility_switcher_out; ?>
+		<?php echo $edit_link_out.$visibility_switcher_out; ?>
 	</div>
 	<div id="dossier-data" class="col-sm-10">
-		<section class="row">
-			<header><h2>Datos del proyecto</h2></header>
-			<dl><?php echo $basic_fields_out ?></dl>
+		<section>
+			<header><h2 class="dossier-section-header">Datos del proyecto</h2></header>
+			<?php echo $basic_fields_out ?>
 		</section>
-		<section class="row">
+		<section>
 			<header><h2>Emisiones</h2></header>
 			<?php echo $emission_per_section_out ?>
 		</section>

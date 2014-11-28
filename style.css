@@ -45,12 +45,16 @@ body { padding-top: 70px; }
 }
 
 /* dossier */
+.dossier-section-header {
+	margin-top: 0;
+}
 .dossier-table-header {
 	font-weight: bold;
 	padding-bottom: 5px;
 	border-bottom: 1px solid #eee;
 	margin-bottom: 15px;
 }
-.dossier-group li {
-	margin-bottom: 0.5em;
+.dossier-group li,
+.dossier-group dd {
+	margin-bottom: 1em;
 }

@@ -1624,4 +1624,97 @@ function hce_project_visibility_switcher() {
 	return $visibility_switcher;
 
 } // end change visibility of a project
+
+// display project basic data in dossier
+function hce_project_display_basic_data($project_id) {
+	global $post;
+	$cfield_prefix = '_hce_project_';
+	$cfields_basic = array("address","city","state","cp","use","built-area","useful-area","adjusted-area","users","budget","energy-label","energy-consumption","co2-emission");
+	foreach ( $cfields_basic as $field ) {
+		$value[$field] = get_post_meta($project_id,$cfield_prefix.$field,TRUE);
+	}
+	$value['desc'] = get_the_content();
+	$basic_fields = array(
+		array(
+			'label' => 'Localización',
+			'unit' => '',
+			'group' => 1,
+			'value' => $value['address']. ", " .$value['city']. ". " .$value['cp']. " " .$value['state']
+		),
+		array(
+			'label' => 'Uso',
+			'unit' => '',
+			'group' => 2,
+			'value' => $value['use']
+		),
+		array(
+			'label' => 'Superficie construida',
+			'unit' => 'm2',
+			'group' => 3,
+			'value' => $value['built-area']
+		),
+		array(
+			'label' => 'Superficie útil',
+			'unit' => 'm2',
+			'group' => 3,
+			'value' => $value['useful-area']
+		),
+		array(
+			'label' => 'Superficie computable',
+			'unit' => 'm2',
+			'group' => 3,
+			'value' => $value['adjusted-area']
+		),
+		array(
+			'label' => 'Número de usuarios',
+			'unit' => '',
+			'group' => 2,
+			'value' => $value['users']
+		),
+		array(
+			'label' => 'Presupuesto',
+			'unit' => '€',
+			'group' => 2,
+			'value' => $value['budget']
+		),
+		array(
+			'label' => 'Calificación energética',
+			'unit' => '',
+			'group' => 4,
+			'value' => $value['energy-label']
+		),
+		array(
+			'label' => 'Consumo energético anual',
+			'unit' => 'kWh/m2 año',
+			'group' => 4,
+			'value' => $value['energy-consumption']
+		),
+		array(
+			'label' => 'Emisión anual de CO2',
+			'unit' => 'Kg CO2/m2 año',
+			'group' => 4,
+			'value' => $value['co2-emission']
+		),
+		array(
+			'label' => 'Descripción',
+			'unit' => '',
+			'group' => 1,
+			'value' => $value['desc']
+		)
+	);
+	$basic_fields_cols = array();
+	foreach ( $basic_fields as $field ) {
+		if ( !array_key_exists($field['group'],$basic_fields_cols) ) {
+			$basic_fields_cols[$field['group']] = "<dl class='col-sm-3 dossier-group'>";
+		} $basic_fields_cols[$field['group']] .= "<dt>".$field['label']."</dt><dd>".$field['value']." ".$field['unit']."</dd>";
+	}
+	$basic_fields_out = "<div class='row'>";
+	foreach ( $basic_fields_cols as $col ) {
+		$basic_fields_out .= $col."</dl>";
+	}
+	$basic_fields_out .= "</div>";
+
+	return $basic_fields_out;
+
+} // end display project basic data
 ?>
