@@ -1576,4 +1576,52 @@ function hce_filter_loops( $query ) {
 	return $query;
 
 } // end filter loops
+
+// change visibility of a project: public to private or viceversa
+function hce_project_visibility_switcher() {
+	global $post;
+	if ( is_user_logged_in() && get_current_user_id() == $post->post_author ) {
+		$location = get_permalink();
+		$action = $location;
+		if ( array_key_exists('visibility',$_GET) ) {
+			$status = sanitize_text_field($_GET['visibility']);
+			$args = array(
+				'ID' => $post->ID,
+					'post_status' => $status,
+				);
+				// update project
+				$updated_id = wp_update_post($args);
+				$location .= "?feedback=visibility_updated";
+				wp_redirect($location);
+				exit;
+		}
+		if ( array_key_exists('feedback',$_GET) ) {
+			$feedback = sanitize_text_field($_GET['feedback']);
+			if ( $feedback == 'visibility_updated') { $feedback_message = "La visibilidad del proyecto se ha actualizado correctamente."; }
+			$feedback_out = "<div class='alert alert-success' role='alert'>".$feedback_message."</div>
+			";
+		} else { $feedback_out = ""; }
+
+		if ( $post->post_status == 'publish' ) {
+			$action .= "?visibility=private";
+			$current_status = "público";
+			$current_class = "success";
+			$change_status = "privado";
+		} else {
+			$action .= "?visibility=publish";
+			$current_status = "privado";
+			$current_class = "danger";
+			$change_status = "público";
+		}
+		$visibility_switcher = $feedback_out."
+		<ul id='dossier-visibility' class='list-unstyled dossier-group'>
+			<li><strong>Visibilidad</strong><br /> <span class='btn btn-".$current_class." btn-xs' disabled='disabled'>Proyecto ".$current_status."</span></li>
+			<li><a class='btn btn-default btn-xs' href='".$action."'>Hacer proyecto ".$change_status."</a></li>
+		</ul>
+		";
+	
+	} else { $visibility_switcher = ""; }
+	return $visibility_switcher;
+
+} // end change visibility of a project
 ?>

@@ -45,9 +45,12 @@ body { padding-top: 70px; }
 }
 
 /* dossier */
-.informe-emision-header {
+.dossier-table-header {
 	font-weight: bold;
 	padding-bottom: 5px;
 	border-bottom: 1px solid #eee;
 	margin-bottom: 15px;
+}
+.dossier-group li {
+	margin-bottom: 0.5em;
 }

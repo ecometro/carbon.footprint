@@ -1,6 +1,7 @@
 <?php get_header();
 
 if ( have_posts() ) { while ( have_posts() ) : the_post();
+	$visibility_switcher_out = hce_project_visibility_switcher();
 
 	$project_id = $post->ID;
 	// get project basic data
@@ -107,13 +108,13 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$emissions_total += $material['emission'] + $material['emission_transport'];
 	}
 	// total emission
-echo "<pre>";
-print_r($emissions);
-echo "</pre>";
-echo $emissions_total;
+//echo "<pre>";
+//print_r($emissions);
+//echo "</pre>";
+//echo $emissions_total;
 	// emission per building user
 	$emission_per_section_out = "
-	<div class='informe-emision-header row'>
+	<div class='dossier-table-header row'>
 		<div class='col-sm-4'><small>CAPÍTULO</small><div class='pull-right'><small>kg CO2 eq</small></div></div>
 		<div class='col-sm-8'><span class='btn btn-primary btn-xs' disabled='disabled'>Intrínsecas</span> <span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span></div>
 	</div>
@@ -146,6 +147,7 @@ echo $emissions_total;
 		</div>
 		";
 	}
+
 ?>
 
 <header class="row" role="banner">
@@ -153,14 +155,18 @@ echo $emissions_total;
 </header>
 
 <main class="row" role="main">
-	<section class="col-sm-3">
-		<header><h2>Datos del proyecto</h2></header>
-		<dl><?php echo $basic_fields_out ?></dl>
-	</section>
-	<section class="col-md-9">
-		<header><h2>Emisiones</h2></header>
-		<?php echo $emission_per_section_out ?>
-	</section>
+	<div id="dossier-meta" class="col-sm-2">
+		<?php echo $visibility_switcher_out; ?>
+	</div>
+	<div id="dossier-data" class="col-sm-10">
+		<section class="row">
+			<header><h2>Datos del proyecto</h2></header>
+			<dl><?php echo $basic_fields_out ?></dl>
+		</section>
+		<section class="row">
+			<header><h2>Emisiones</h2></header>
+			<?php echo $emission_per_section_out ?>
+		</section>
 </main>
 
 <?php endwhile;
