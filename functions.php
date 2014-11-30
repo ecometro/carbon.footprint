@@ -1417,7 +1417,7 @@ function hce_db_emissions_table_populate() {
 			if ( $line == 0 ) { // check version
 				$emissions_data_new_ver = $fp_csv[0];
 				if ( $emissions_data_current_ver == $emissions_data_new_ver ) { return; /* stop: current version is up to date */ }
-
+				else {  /* empty table */ $wpdb->query( "TRUNCATE TABLE `$table`" ); }
 			} elseif ( $line == 1 ) { /* csv file headers */ }
 
 			else {
@@ -1431,25 +1431,7 @@ function hce_db_emissions_table_populate() {
 					'subtype' => $fp_csv[1],
 					'emission_factor' => $emission_factor
 				);
-				$where = array(
-					'opendap_code' => $opendap_code
-				);
-				// query to know if there is already rows for this opendap code
-				if ( $opendap_code == '' ) { // if subtype has no opendap code, then take subtype to know if there is already a row
-					$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE subtype='{$fp_csv[1]}' LIMIT 1";
-				} else {
-					$select_query = "SELECT opendap_code,emission_factor FROM $table WHERE opendap_code='$opendap_code' LIMIT 1";
-				}
-				$select = $wpdb->get_results($select_query,OBJECT_K);
-				if ( array_key_exists($opendap_code,$select) ) { // if there is a row for this code
-					if ( $select[$opendap_code]->emission_factor != $emission_factor ) {
-						/* update row */ $wpdb->update( $table, $data, $where, $format );
-					}
-
-				} else { // if there is no row for this code
-					/* create row */ $wpdb->insert( $table, $data, $format );
-
-				}
+				/* create row */ $wpdb->insert( $table, $data, $format );
 
 			} // end if not line 0
 			$line++;
@@ -1530,21 +1512,7 @@ function hce_db_materials_table_populate() {
 					'component_3_mass' => $component3_mass,
 					'dap_factor' => $dap_factor
 				);
-//				$where = array(
-//					'material_code' => $material_code
-//				);
-				// query to know if there is already rows for this opendap code
-//				$select_query = "SELECT material_code FROM $table WHERE material_code='$material_code' LIMIT 1";
-//				$select = $wpdb->get_results($select_query,OBJECT_K);
-//				if ( array_key_exists($material_code,$select) ) { // if there is a row for this code
-//					if ( $select[$material_code]->emission_factor != $emission_factor ) {
-//						/* update row */ $wpdb->update( $table, $data, $where, $format );
-//					}
-
-//				} else { // if there is no row for this code
-					/* create row */ $wpdb->insert( $table, $data, $format );
-
-//				}
+				/* create row */ $wpdb->insert( $table, $data, $format );
 
 			} // end if not line 0
 			$line++;
