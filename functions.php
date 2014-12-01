@@ -563,6 +563,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 	$count = 0;
 	$emissions = array();
 	$weight = array();
+	$building_total_weight = 0;
 	foreach ( $query_results as $material ) {
 		$count++;
 		$material_id = $material['id'];
@@ -572,7 +573,11 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 			if ( !array_key_exists($material_id,$emissions) ) {
 				$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
 			}
-			$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $material['emission_factor'];
+			$this_weight = $material['material_amount'] * $material['component_1_mass'];
+			$emissions[$material_id][] = $this_weight * $material['emission_factor'];
+
+			// total weight of building
+			$building_total_weight += $this_weight;
 
 			// weight of subtypes array
 			if ( !array_key_exists($material['component_1'],$weight) ) {
@@ -593,6 +598,9 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 		} // end if emission type
 
 	}
+
+	// save total weight of building
+	update_post_meta($project_id, $cfield_prefix.'mass_total', $building_total_weight);
 
 	// sort subtypes: heaviest to lightest
 	if ( $emission_type == 'intrinsic' ) {
