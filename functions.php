@@ -1728,7 +1728,7 @@ function hce_create_custom_content() {
 
 } // END create theme custom content
 
-} // custom configuration option
+// custom configuration option
 function hce_custom_configuration() {
 	update_option('can_user_register', 1);
 	update_option('default_role', 'suscriber');
