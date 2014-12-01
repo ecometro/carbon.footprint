@@ -48,9 +48,12 @@ function hce_theme_setup() {
 	// filter loops
 	add_filter( 'pre_get_posts', 'hce_filter_loops' );
 
+	// create custom content
+	add_action('after_switch_theme', 'hce_create_custom_content');
+
 	// create custom tables in DB
-	add_action('after_switch_theme', 'hce_db_materials_table');
-	add_action('after_switch_theme', 'hce_db_emissions_table');
+//	add_action('after_switch_theme', 'hce_db_materials_table');
+//	add_action('after_switch_theme', 'hce_db_emissions_table');
 
 	// update custom tables structure in DB
 	add_action( 'init', 'hce_db_custom_tables_update', 99 );
@@ -1693,4 +1696,32 @@ function hce_project_display_basic_data($project_id) {
 	return $basic_fields_out;
 
 } // end display project basic data
+
+// create theme custom content
+function hce_create_custom_content() {
+
+	$custom_contents = array(
+		array(
+			'title' => 'Evaluar un proyecto',
+			'slug' => 'calculo-huella-carbono',
+			'template' => 'page-hce-form.php',
+		),
+	);
+	foreach ( $custom_contents as $cc ) {
+		$page_exists = get_page_by_path($cc['slug'],'ARRAY_N');
+		if ( !is_array($page_exists) ) {
+			// insert contents
+			$page_id = wp_insert_post(array(
+				'post_type' => 'page',
+				'post_status' => 'publish',
+				'post_author' => 1,
+				'post_title' => $cc['title'],
+				'post_name' => $cc['slug'],
+				'page_template' => $cc['template']
+			));
+
+		} // end if this content doesn't exist
+	} // end foreach contents array
+
+} // END create theme custom content
 ?>
