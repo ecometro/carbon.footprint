@@ -17,7 +17,7 @@ function hce_theme_setup() {
 	    define('HCE_BLOGTHEME', get_bloginfo('template_directory'));
 
 	/* Set up media options: sizes, featured images... */
-	add_action( 'init', 'hce_media_options' );
+//	add_action( 'init', 'hce_media_options' );
 
 	/* Add your nav menus function to the 'init' action hook. */
 	add_action( 'init', 'hce_register_menus' );
@@ -50,6 +50,9 @@ function hce_theme_setup() {
 
 	// create custom content
 	add_action('after_switch_theme', 'hce_create_custom_content');
+
+	// config custom options
+	add_action('after_switch_theme', 'hce_custom_configuration');
 
 	// create custom tables in DB
 //	add_action('after_switch_theme', 'hce_db_materials_table');
@@ -1724,4 +1727,10 @@ function hce_create_custom_content() {
 	} // end foreach contents array
 
 } // END create theme custom content
+
+} // custom configuration option
+function hce_custom_configuration() {
+	update_option('can_user_register', 1);
+	update_option('default_role', 'suscriber');
+} // END custom configuration options
 ?>
