@@ -684,9 +684,21 @@ function hce_project_upload_file() {
 			if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_not_deleted";
 			} else {
-				delete_post_meta($project_id,$cfield_prefix.'csv_file');
+				$cfields_to_delete = array('csv_file','mass_topten','mass_total','emission_total','emission_transport_total');
+				foreach ( $cfields_to_delete as $cfield_name ) { delete_post_meta($project_id,$cfield_prefix.$cfield_name); }
+				foreach ( array('transport_distance','transport_type') as $cfield_name) {
+					for ( $c = 1; $c <= 10; $c++ ) {
+						delete_post_meta($project_id,$cfield_prefix.$cfield_name."-".$c); 
+					}
+				}
 				$table = $wpdb->prefix. "hce_project_" .$project_id;
 				/* empty project table */ $wpdb->query( "TRUNCATE TABLE `$table`" ); 
+				$args = array(
+					'ID' => $project_id,
+					'post_status' => 'draft',
+				);
+				// update project
+				$updated_id = wp_update_post($args);
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_deleted";
 			}
 			wp_redirect($location);
@@ -1716,6 +1728,7 @@ function hce_create_custom_content() {
 		array(
 			'title' => 'Evaluar un proyecto',
 			'slug' => 'calculo-huella-carbono',
+			'content' => '',
 			'template' => 'page-hce-form.php',
 		),
 	);
