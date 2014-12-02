@@ -60,17 +60,23 @@ body { padding-top: 70px; }
 	margin-bottom: 1em;
 }
 /* dossier circles */
-.dossier-circle {
+.dossier-circle,
+.list-circle {
 	position: relative;
 	margin: 0 auto;
 }
-.dossier-circle:before {
+.list-circle {
+	width: 90%;
+}
+.dossier-circle:before,
+.list-circle:before {
 	content: "";
 	display: block;
 	padding-top: 100%;/* ratio of 1:1 */
 }
-.dossier-circle-label {
-	position:  absolute;
+.dossier-circle-label,
+.list-circle-label {
+	position: absolute;
 	top: 0;
 	left: 0;
 	bottom: 0;
@@ -78,8 +84,18 @@ body { padding-top: 70px; }
 	border-radius: 50%;
 	padding: 20% 0 0 0;
 	text-align: center;
+}
+.dossier-circle-label {
 	font-weight: bold;
 }
 .dossier-circle-text {
 	text-align: center;
+}
+
+/* archive and author lists */
+.list-item {
+	margin-bottom: 20px;
+}
+.list-heading {
+	margin-top: 0;
 }

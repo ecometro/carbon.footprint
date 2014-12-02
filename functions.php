@@ -443,11 +443,13 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 function hce_project_calculate_emissions($project_id,$emission_type) {
 	global $wpdb;
 	$cfield_prefix = '_hce_project_';
+	$building_total_emission = array();
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
 	$table_m = $wpdb->prefix . "hce_materials";
 	$table_e = $wpdb->prefix . "hce_emissions";
 	if ( $emission_type == 'intrinsic' ) {
 		$col_to_update = "emission";
+		$building_total_emission['key'] = 'emission_total';
 		$sql_query = "
 			SELECT
 			  p.id,
@@ -500,6 +502,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 
 	} elseif ( $emission_type == 'transport' ) {
 		$col_to_update = "emission_transport";
+		$building_total_emission['key'] = 'emission_transport_total';
 		$topten = get_post_meta($project_id,$cfield_prefix."mass_topten");
 		$select_where = "";
 		foreach ( $topten as $tt ) { $select_where .= "'".$tt."', "; }
@@ -574,7 +577,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 		$count++;
 		$material_id = $material['id'];
 
-		if ( $emission_type == 'intrinsic' ) {
+		if ( $emission_type == 'intrinsic' ) { // if intrinsic emissions
 			// emission maths
 			if ( !array_key_exists($material_id,$emissions) ) {
 				$emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $material['dap_factor'];
@@ -592,30 +595,29 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 				$weight[$material['component_1']] += $material['material_amount'] * $material['material_mass'];
 			}
 			
-		} elseif ( $emission_type == 'transport' ) {
+		} elseif ( $emission_type == 'transport' ) { // if transport emissions
 			$material_subtype = $material['component_1'];
 			// emission maths
-			if ( !array_key_exists($material_id,$emissions) ) {
+			if ( !array_key_exists($material_id,$emissions) ) { // if first subtype of this material
 				if ( $material['dap_factor'] == 0 ) { $emissions[$material_id][] = 0; }
 				else { $emissions[$material_id][] = $material['material_amount'] * $material['material_mass'] * $topten_data[$material_subtype]['emission'] * $topten_data[$material_subtype]['distance']; }
-			}
+			} // end if first subtype
 				$emissions[$material_id][] = $material['material_amount'] * $material['component_1_mass'] * $topten_data[$material_subtype]['emission'] * $topten_data[$material_subtype]['distance'];
 
 		} // end if emission type
 
 	}
 
-	// save total weight of building
-	update_post_meta($project_id, $cfield_prefix.'mass_total', $building_total_weight);
-
-	// sort subtypes: heaviest to lightest
 	if ( $emission_type == 'intrinsic' ) {
+		// sort subtypes: heaviest to lightest
 		arsort($weight);
 		// select top ten
 		$weight_topten = array_slice($weight, 0, 10, true);
 		foreach ( $weight_topten as $subtype => $kg ) {
 			add_post_meta($project_id, $cfield_prefix.'mass_topten', $subtype, false);
 		}
+		// save total weight of building
+		update_post_meta($project_id, $cfield_prefix.'mass_total', $building_total_weight);
 	}
 
 	$update_cases = array();
@@ -626,12 +628,16 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 			if ( !array_key_exists(2,$emission) ) { $emission[2] = 0; }
 			if ( !array_key_exists(3,$emission) ) { $emission[3] = 0; }
 			$material_emission = ( $emission[1] + $emission[2] + $emission[3] );
+
 		} else { /* if there is DAP, then ignore three subtypes */ $material_emission = $emission[0]; }
 
 		if ( $material_emission != 0 ) {
 			array_push($update_cases,"WHEN ".$id." THEN '".$material_emission."'");
 			array_push($update_where,"%s");
 			array_push($update_ids,$id);
+
+			// total emission of building
+			$building_total_emission['value'] += $material_emission;
 		}
 	}
 	$update_cases = implode(" ", $update_cases);
@@ -644,6 +650,9 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 		WHERE id IN ($update_where)
 	";
 	$wpdb->query( $wpdb->prepare($query_update, $update_ids) );
+
+	// save total emissions of building
+	update_post_meta($project_id, $cfield_prefix.$building_total_emission['key'], $building_total_emission['value']);
 
 } // end calculate CO2 emission for each material in the project table
 

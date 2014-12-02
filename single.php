@@ -31,7 +31,8 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 //print_r($query_results);
 //echo "</pre>";
 	$emissions = array();
-	$emissions_total = 0;
+	// $emissions_total = ;
+	$emissions_total = get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true);
 	$e_max = 0;
 	foreach ( $query_results as $material ) {
 		if ( !array_key_exists($material['section_name'],$emissions) ) {
@@ -45,7 +46,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$max_candidate = $emissions[$material['section_name']]['emission'] + $emissions[$material['section_name']]['emission_transport'];
 		if ( $e_max <= $max_candidate ) { $e_max = $max_candidate; }
 		// total emission
-		$emissions_total += $material['emission'] + $material['emission_transport'];
+//		$emissions_total += $material['emission'] + $material['emission_transport'];
 	}
 //echo "<pre>";
 //print_r($emissions);
