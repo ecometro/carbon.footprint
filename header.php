@@ -52,7 +52,7 @@ wp_head(); ?>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/hce-logo.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
+			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
 		</div>
 		<div class="collapse navbar-collapse" id="hce-pre-navbar-collapse">
 			<?php $location = "header-menu";
