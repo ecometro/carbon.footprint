@@ -1745,6 +1745,41 @@ function hce_project_display_basic_data($project_id) {
 
 } // end display project basic data
 
+// display project transport data
+function hce_project_display_transport_data($project_id) {
+	global $wpdb;
+	$cfield_prefix = '_hce_project_';
+	// get heaviest materials
+	$topten = get_post_meta($project_id,$cfield_prefix."mass_topten");
+	// prepare distance texts
+	$distances = array(
+		'200' => 'Local (200 km)',
+		'800' => 'Nacional (800 km)',
+		'2500' => 'Europea (2500 km)',
+		'8000' => 'Internacional (8000 km)'
+	);
+	// prepare type texts
+	$table_e = $wpdb->prefix . "hce_emissions";
+	$select_query = "SELECT emission_factor,subtype FROM $table_e WHERE type='TRANSPORTE'";
+	$types = $wpdb->get_results($select_query,OBJECT_K);
+	// build materials array
+	$tt_count = 0;
+	$tt_out = array();
+	foreach ( $topten as $tt ) {
+		$tt_count++;
+		$tt_out[$tt_count]['material'] = $tt;
+		$current_distance = get_post_meta($project_id,$cfield_prefix."transport_distance-".$tt_count,TRUE);
+		foreach ( $distances as $value => $text ) {
+			if ( $current_distance == $value ) { $tt_out[$tt_count]['distance'] = $text; break; }
+		}
+		$current_type = get_post_meta($project_id,$cfield_prefix."transport_type-".$tt_count,TRUE);
+		foreach ( $types as $value => $text ) {
+			if ( $current_type == $value ) { $tt_out[$tt_count]['type'] = $text->subtype; break; }
+		}
+	}
+	return $tt_out;
+} // display project transport data
+
 // create theme custom content
 function hce_create_custom_content() {
 

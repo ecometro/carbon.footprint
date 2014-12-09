@@ -24,6 +24,23 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	// get project basic data
 	$basic_fields_out = hce_project_display_basic_data($project_id);
 
+	// get project transport data
+	$transport_data = hce_project_display_transport_data($project_id);
+//print_r($transport_data);
+	$transport_out = "
+		<table class='table table-condensed'>
+		<thead><tr>
+			<th>Material</th>
+			<th>Distancia</th>
+			<th>Medio</th>
+		</tr></thead>
+		<tbody>		
+	";
+	foreach ( $transport_data as $mat ) {
+		$transport_out .= "<tr><td>".$mat['material']."</td><td>".$mat['distance']."</td><td>".$mat['type']."</td></tr>";
+	}
+	$transport_out .= "</tbody></table>";
+
 	// calculate emissions
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
 	$sql_query = "
@@ -64,7 +81,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$emission_per_section_out = "
 	<div class='dossier-table-header row'>
 		<div class='col-sm-3'><small>CAPÍTULO</small><div class='pull-right'><small>kg CO2 eq</small></div></div>
-		<div class='col-sm-9'><span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-primary btn-xs' disabled='disabled'>Intrínsecas</span></div>
+		<div class='col-sm-9'><span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-primary btn-xs' disabled='disabled'>Embebidas</span></div>
 	</div>
 	";
 //print_r($e_max);
@@ -156,6 +173,11 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 			<header><h2>Datos del proyecto</h2></header>
 			<?php echo $basic_fields_out; ?>
 		</section>
+		<section class="dossier-section" id="dossier-transport">
+			<header><h2>Datos de transporte</h2></header>
+			<?php echo $transport_out; ?>
+		</section>
+
 		<section class="dossier-section" id="dossier-emission">
 			<header class="row"><h2 class="col-sm-12">Emisiones <small>Total: <strong class="bg-info"><?php echo $emissions_total; ?></strong> kg de CO<sub>2</sub> equivalente</small></h2></header>
 			<div class="row">
