@@ -274,16 +274,16 @@ function hce_project_insert_basic_data() {
 
 		} // end if project exists
 
-			if ( $project_id != 0 ) { // if project has been created
-				// insert custom fields
-				reset($cfields);
-				foreach ( $cfields as $key => $value ) {
-					update_post_meta($project_id, $key, $value);
-				}
-				// create custom table for project in DB
-				hce_project_create_table($project_id);
-				$location .= "?step=2&project_id=".$project_id.$location_feedback;
-			} // end if project has been created
+		if ( $project_id != 0 ) { // if project has been created
+			// insert custom fields
+			reset($cfields);
+			foreach ( $cfields as $key => $value ) {
+				update_post_meta($project_id, $key, $value);
+			}
+			// create custom table for project in DB
+			hce_project_create_table($project_id);
+			$location .= "?step=2&project_id=".$project_id.$location_feedback;
+		} // end if project has been created
 
 		// redirect to prevent resend
 		wp_redirect( $location );
@@ -717,7 +717,7 @@ function hce_project_upload_file() {
 					wp_redirect($location);
 					exit;
 				}
-				if ( $file['size'] >= '40000' ) {
+				if ( $file['size'] >= '400000' ) {
 					$location .= "?step=2&project_id=".$project_id."&feedback=filesize";
 					wp_redirect($location);
 					exit;
@@ -850,7 +850,7 @@ function hce_project_emission_transport() {
 		// calculate transport CO2 emissions for each material in the top ten
 		hce_project_calculate_emissions($project_id,'transport');
 		$args = array(
-			'ID' => $post->ID,
+			'ID' => $project_id,
 			'post_status' => 'private',
 		);
 		// update project
