@@ -1577,7 +1577,7 @@ function hce_db_materials_table_populate() {
 // filter loops
 function hce_filter_loops( $query ) {
 //	false == $query->query_vars['suppress_filters'] 
-	if ( !is_admin() && is_author() && $query->is_main_query() ) {
+	if ( !is_admin() && is_archive() && $query->is_main_query() ) {
 		$query->set('post_type',array('project')); 
 		global $current_user;
 		get_currentuserinfo();
