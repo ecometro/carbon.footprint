@@ -1168,7 +1168,7 @@ function hce_form() {
 				<label for='hce-form-step".$step."-csv' class='col-sm-3 control-label'>Archivo CSV de mediciones <span class='glyphicon glyphicon-asterisk'></span></label>
 				<div class='col-sm-4'>
 					<input type='file' name='hce-form-step".$step."-csv' />
-					<input type='hidden' name='MAX_FILE_SIZE' value='40000' />
+					<input type='hidden' name='MAX_FILE_SIZE' value='400000' />
 				</div>
 				<p class='col-sm-5 help-block'><small><span class='glyphicon glyphicon-asterisk'></span> Campos requeridos.<br />Formato <abbr title='Comma Separated Values'>CSV</abbr>. Tamaño máximo 40kB.</small></p>
 			</fieldset>
