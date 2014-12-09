@@ -112,8 +112,9 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$c_count = 0;
 	foreach ( $circles as $e => $texts ) {
 		$c_count++;
-		if ( $c_count == 1 ) { $c_max = $e; }
-		$c_relative = round( $e * 100 / $c_max );
+		$r = sqrt( $e/M_PI );
+		if ( $c_count == 1 ) { $c_max = $r; }
+		$c_relative = round( $r * 100 / $c_max );
 		if ( $c_relative <= 5 ) { $c_relative = 5; }
 		$c_margin = ( 100 - $c_relative ) / 2;
 		if ( $c_relative == 100 ) { $c_styles = "";  $c_label_styles = " style='font-size: 3em;'"; }
