@@ -1603,28 +1603,47 @@ function hce_project_visibility_switcher() {
 			wp_redirect($location);
 			exit;
 		}
+		// feedback message
 		if ( array_key_exists('feedback',$_GET) ) {
 			$feedback = sanitize_text_field($_GET['feedback']);
 			if ( $feedback == 'visibility_updated') { $feedback_message = "La visibilidad del proyecto se ha actualizado correctamente."; }
-			$feedback_out = "<div class='alert alert-success' role='alert'>".$feedback_message."</div>
-			";
+			$feedback_out = "<div class='alert alert-success' role='alert'>".$feedback_message."</div>";
+
+		} elseif ( $post->post_status == 'draft' ) {
+			$feedback_message = "La evaluación del proyecto está incompleta y muchos de los resultados no se pueden mostrar. Puedes acabar la evaluación pinchando en el botón 'Editar proyecto'.";
+			$feedback_out = "<div class='alert alert-warning' role='alert'>".$feedback_message."</div>";
+
 		} else { $feedback_out = ""; }
 
-		if ( $post->post_status == 'publish' ) {
+		// status output
+		if ( $post->post_status == 'draft' ) {
+			$current_status = "incompleto";
+			$current_class = "warning";
+			$change_status = "";
+
+		} elseif ( $post->post_status == 'publish' ) {
 			$action .= "?visibility=private";
 			$current_status = "público";
 			$current_class = "success";
 			$change_status = "privado";
-		} else {
+
+		} elseif ( $post->post_status == 'private' ) {
 			$action .= "?visibility=publish";
 			$current_status = "privado";
 			$current_class = "danger";
 			$change_status = "público";
+
 		}
+
+		// action button
+		if ( $change_status != '' ) {
+			$action_button = "<li><a class='btn btn-default btn-xs' href='".$action."'>Hacer proyecto ".$change_status."</a></li>";
+		} else { $action_button = ""; }
+
 		$visibility_switcher = $feedback_out."
 		<ul id='dossier-visibility' class='list-unstyled dossier-group'>
 			<li><strong>Visibilidad</strong><br /> <span class='btn btn-".$current_class." btn-xs' disabled='disabled'>Proyecto ".$current_status."</span></li>
-			<li><a class='btn btn-default btn-xs' href='".$action."'>Hacer proyecto ".$change_status."</a></li>
+			" .$action_button. "
 		</ul>
 		";
 	
