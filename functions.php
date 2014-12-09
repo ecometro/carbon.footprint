@@ -444,6 +444,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 	global $wpdb;
 	$cfield_prefix = '_hce_project_';
 	$building_total_emission = array();
+		$building_total_emission['value'] = 0;
 	$table_p = $wpdb->prefix . "hce_project_" .$project_id;
 	$table_m = $wpdb->prefix . "hce_materials";
 	$table_e = $wpdb->prefix . "hce_emissions";
@@ -853,6 +854,15 @@ function hce_project_emission_transport() {
 
 		// calculate transport CO2 emissions for each material in the top ten
 		hce_project_calculate_emissions($project_id,'transport');
+		$args = array(
+			'ID' => $post->ID,
+			'post_status' => 'private',
+		);
+		// update project
+		$updated_id = wp_update_post($args);
+		$location .= "?step=4&project_id=".$project_id."feedback=eval_complete";
+		wp_redirect($location);
+		exit;
 
 	} else { // if user is not logged in
 			$location .= "?step=1&feedback=user";
@@ -1590,13 +1600,13 @@ function hce_project_visibility_switcher() {
 			$status = sanitize_text_field($_GET['visibility']);
 			$args = array(
 				'ID' => $post->ID,
-					'post_status' => $status,
-				);
-				// update project
-				$updated_id = wp_update_post($args);
-				$location .= "?feedback=visibility_updated";
-				wp_redirect($location);
-				exit;
+				'post_status' => $status,
+			);
+			// update project
+			$updated_id = wp_update_post($args);
+			$location .= "?feedback=visibility_updated";
+			wp_redirect($location);
+			exit;
 		}
 		if ( array_key_exists('feedback',$_GET) ) {
 			$feedback = sanitize_text_field($_GET['feedback']);
