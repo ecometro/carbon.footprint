@@ -11,6 +11,12 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$edit_link_out = "<p><a class='btn btn-default btn-xs' href='/calculo-huella-carbono/?step=1&project_id=".$post->ID."'>Editar proyecto</a></p>";
 	} else { $edit_link_out = ""; }
 
+	// view complete dossier link
+	if ( is_user_logged_in() && get_current_user_id() == $post->post_author && $post->post_status != 'draft' ) {
+		$dossier_link_out = "<p><a class='btn btn-default btn-xs' href='?view=informe'>Ver informe completo</a></p>";
+	} else { $dossier_link_out = ""; }
+
+
 	// get project basic data
 	$basic_fields_out = hce_project_display_basic_data($project_id);
 
@@ -32,7 +38,6 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 //echo "</pre>";
 	$emissions = array();
 	// $emissions_total = ;
-	$emissions_total = get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true);
 	$e_max = 0;
 	foreach ( $query_results as $material ) {
 		if ( !array_key_exists($material['section_name'],$emissions) ) {
@@ -89,7 +94,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 
 	// emissions circles
 	$cfield_prefix = '_hce_project_';
-	$emissions_total = round($emissions_total,1);
+	$emissions_total = round( get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true) );
 	$users = get_post_meta($project_id,$cfield_prefix."users",TRUE);
 	$built_area = get_post_meta($project_id,$cfield_prefix."built-area",TRUE);
 	$budget = get_post_meta($project_id,$cfield_prefix."budget",TRUE);
@@ -139,7 +144,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 <main role="main">
 <div class="row">
 	<div id="dossier-meta" class="col-sm-2">
-		<?php echo $edit_link_out.$visibility_switcher_out; ?>
+		<?php echo $dossier_link_out.$edit_link_out.$visibility_switcher_out; ?>
 	</div>
 	<section id="dossier-data" class="col-sm-10">
 		<header><h2 class="dossier-section-header">Datos del proyecto</h2></header>
