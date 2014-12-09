@@ -1,10 +1,10 @@
 <?php
 /* Template name: Formulario HCE */
-get_header();
 
 // call carbon footprint form
 $form_out = hce_form();
 
+get_header();
 ?>
 
 <header class="row" role="banner">
