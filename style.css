@@ -60,6 +60,12 @@ body { padding-top: 70px; }
 	margin-bottom: 1em;
 }
 /* dossier circles */
+.dossier-section {
+	margin-bottom: 40px;
+}
+.dossier-section h2 {
+	margin-top: 0;
+}
 .dossier-circle,
 .list-circle {
 	position: relative;

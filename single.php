@@ -2,6 +2,7 @@
 
 if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$project_id = $post->ID;
+	$project_name = get_the_title();
 
 	// visibility switcher
 	$visibility_switcher_out = hce_project_visibility_switcher();
@@ -12,8 +13,11 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	} else { $edit_link_out = ""; }
 
 	// view complete dossier link
+	if ( array_key_exists('view',$_GET) ) { $view = sanitize_text_field($_GET['view']); } else { $view = ""; }
 	if ( is_user_logged_in() && get_current_user_id() == $post->post_author && $post->post_status != 'draft' ) {
-		$dossier_link_out = "<p><a class='btn btn-default btn-xs' href='?view=informe'>Ver informe completo</a></p>";
+		if ( $view == 'dossier' ) { $dossier_link_text = "Ver resumen de resultados"; $dossier_link = "results"; }
+		else { $dossier_link_text = "Ver informe completo"; $dossier_link = "dossier"; }
+		$dossier_link_out = "<p><a class='btn btn-default btn-xs' href='?view=".$dossier_link."'>".$dossier_link_text."</a></p>";
 	} else { $dossier_link_out = ""; }
 
 
@@ -59,8 +63,8 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 //echo $emissions_total;
 	$emission_per_section_out = "
 	<div class='dossier-table-header row'>
-		<div class='col-sm-3 col-sm-offset-2'><small>CAPÍTULO</small><div class='pull-right'><small>kg CO2 eq</small></div></div>
-		<div class='col-sm-7'><span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-primary btn-xs' disabled='disabled'>Intrínsecas</span></div>
+		<div class='col-sm-3'><small>CAPÍTULO</small><div class='pull-right'><small>kg CO2 eq</small></div></div>
+		<div class='col-sm-9'><span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-primary btn-xs' disabled='disabled'>Intrínsecas</span></div>
 	</div>
 	";
 //print_r($e_max);
@@ -76,9 +80,9 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		else { $transport_relative = round( $transport * 100 / $e_max ); }
 		$emission_per_section_out .= "
 		<div class='row'>
-			<div class='col-sm-2 col-sm-offset-2'><small>".$section."</small></div>
+			<div class='col-sm-2'><small>".$section."</small></div>
 			<div class='col-sm-1'><div class='pull-right'><small>".$total."</small></div></div>
-			<div class='col-sm-7'>
+			<div class='col-sm-9'>
 				<div class='progress'>
 					<div class='progress-bar progress-bar-info' style='width: ".$transport_relative."%;'>
 					".$transport."
@@ -139,28 +143,27 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 ?>
 
 <header class="row" role="banner">
-	<h1 class="col-sm-12 page-header"><?php the_title(); ?> <small>Memoria de Cálculo de Huella de Carbono</small></h1>
+	<h1 class="col-sm-12 page-header"><?php echo $project_name; ?> <small>Memoria de Cálculo de Huella de Carbono</small></h1>
 </header>
 
-<main role="main">
-<div class="row">
+<main class="row" role="main">
 	<div id="dossier-meta" class="col-sm-2">
 		<?php echo $dossier_link_out.$edit_link_out.$visibility_switcher_out; ?>
 	</div>
-	<section id="dossier-data" class="col-sm-10">
-		<header><h2 class="dossier-section-header">Datos del proyecto</h2></header>
-		<?php echo $basic_fields_out ?>
-	</section>
-</div>
-<div class="row">
-	<section id="dossier-emission" class="col-sm-12">
-		<header class="row"><h2 class="col-sm-10 col-sm-offset-2">Emisiones <small>Total: <strong class="bg-info"><?php echo $emissions_total; ?></strong> kg de CO<sub>2</sub> equivalente</small></h2></header>
-		<div class="row">
-			<div class="col-sm-10 col-sm-offset-2"><?php echo $circles_row1.$circles_row2; ?></div>
-		</div>
-		<?php echo $emission_per_section_out ?>
-	</section>
-</div>
+	<div id="dossier-data" class="col-sm-10">
+		<?php if ( $view == 'dossier' ) { include "project-dossier.php"; } ?>
+		<section class="dossier-section" id="dossier-data">
+			<header><h2>Datos del proyecto</h2></header>
+			<?php echo $basic_fields_out; ?>
+		</section>
+		<section class="dossier-section" id="dossier-emission">
+			<header class="row"><h2 class="col-sm-12">Emisiones <small>Total: <strong class="bg-info"><?php echo $emissions_total; ?></strong> kg de CO<sub>2</sub> equivalente</small></h2></header>
+			<div class="row">
+				<div class="col-sm-12"><?php echo $circles_row1.$circles_row2; ?></div>
+			</div>
+			<?php echo $emission_per_section_out ?>
+		</section>
+	</div>
 </main>
 
 <?php endwhile;
