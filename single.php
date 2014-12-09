@@ -115,7 +115,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$r = sqrt( $e/M_PI );
 		if ( $c_count == 1 ) { $c_max = $r; }
 		$c_relative = round( $r * 100 / $c_max );
-		if ( $c_relative <= 5 ) { $c_relative = 5; }
+		if ( $c_relative <= 1 ) { $c_relative = 1; }
 		$c_margin = ( 100 - $c_relative ) / 2;
 		if ( $c_relative == 100 ) { $c_styles = "";  $c_label_styles = " style='font-size: 3em;'"; }
 		elseif ( $c_relative <= 25 ) { $c_styles = " text-indent: 110%; margin-top: ".$c_margin."%;"; $c_label_styles = " style='color: #000;'"; }
