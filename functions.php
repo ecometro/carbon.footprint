@@ -17,7 +17,7 @@ function hce_theme_setup() {
 	    define('HCE_BLOGTHEME', get_bloginfo('template_directory'));
 
 	/* Set up media options: sizes, featured images... */
-//	add_action( 'init', 'hce_media_options' );
+	add_action( 'init', 'hce_media_options' );
 
 	/* Add your nav menus function to the 'init' action hook. */
 	add_action( 'init', 'hce_register_menus' );
@@ -110,13 +110,13 @@ function hce_login_form( $redirect_url = '' ) {
 function hce_media_options() {
 	/* Add theme support for post thumbnails (featured images). */
 	add_theme_support( 'post-thumbnails', array( 'project') );
-	set_post_thumbnail_size( 231, 0 ); // default Post Thumbnail dimensions
+	set_post_thumbnail_size( 300, 0 ); // default Post Thumbnail dimensions
 	/* set up image sizes*/
-	update_option('thumbnail_size_w', 231);
+	update_option('thumbnail_size_w', 300);
 	update_option('thumbnail_size_h', 0);
-	update_option('medium_size_w', 474);
+	update_option('medium_size_w', 600);
 	update_option('medium_size_h', 0);
-	update_option('large_size_w', 717);
+	update_option('large_size_w', 1200);
 	update_option('large_size_h', 0);
 } // end set up media options
 
