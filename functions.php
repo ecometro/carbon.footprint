@@ -137,14 +137,14 @@ function hce_load_scripts() {
 	wp_register_style( 'bootstrap-css', get_template_directory_uri() . '/bootstrap/css/bootstrap.min.css' );
 	wp_register_style( 'hce-css', get_stylesheet_uri(), array('bootstrap-css') );
 	wp_enqueue_style('hce-css');
-	wp_enqueue_script('jquery');
-//	wp_enqueue_script(
-//		'bootstrap-js',
-//		get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js',
-//		array( 'jquery' ),
-//		'3.3.0',
-//		FALSE
-//	);
+//	wp_enqueue_script('jquery');
+	wp_enqueue_script(
+		'bootstrap-js',
+		get_template_directory_uri() . '/bootstrap/js/bootstrap.min.js',
+		array( 'jquery' ),
+		'3.3.0',
+		FALSE
+	);
 
 } // end load js scripts to avoid conflicts
 
