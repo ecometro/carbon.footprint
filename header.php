@@ -68,7 +68,7 @@ wp_head(); ?>
 				<?php if ( is_user_logged_in() ) {
 					$user_id = get_current_user_id();
 					$user_projects_url = get_author_posts_url($user_id);
-					$user_loginout_url = HCE_BLOGURL."/calculo-huella-carbono/?redirect_to=".$_SERVER['REQUEST_URI'];
+					$user_loginout_url = wp_logout_url($_SERVER['REQUEST_URI']);
 					$user_loginout_text = "Abandonar sesión"; ?>
 					<li><a href="<?php echo $user_projects_url; ?>">Mis proyectos</a></li>
 				<?php } else {
