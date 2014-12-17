@@ -76,7 +76,14 @@ function hce_theme_setup() {
 // display login form
 function hce_login_form( $redirect_url = '' ) {	
 	$login_action = wp_login_url($redirect_url);
-	$form_out = "
+
+	if ( array_key_exists('login',$_GET) ) {
+		$login_fail = sanitize_text_field($_GET['login']);
+		if ( $login_fail == 'failed' ) { $feedback_type = "danger"; $feedback_text = "El nombre de usuario o la contraseña no son correctos. Por favor, inténtalo de nuevo. Si olvidaste tu contraseña, puedes solicitar una nueva."; }
+		$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
+	} else { $feedback_out = ""; }
+
+	$form_out = $feedback_out. "
 	<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
 		<div class='form-horizontal col-md-12'>
 		<fieldset class='form-group'>
@@ -119,9 +126,9 @@ function hce_login_failed( $user ) {
 	// check that were not on the default login page
 	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $user!=null ) {
 		// make sure we don't already have a failed login attempt
-		if ( !strstr($ref, '?login=failed' )) {
+		if ( !strstr($ref, '&login=failed' )) {
 			// Redirect to the login page and append a querystring of login failed
-			wp_redirect( $ref . '?login=failed');
+			wp_redirect( $ref . '&login=failed');
 		} else { wp_redirect( $ref ); }
 
 		exit;
@@ -141,9 +148,9 @@ function hce_blank_login( $user ){
 	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $error ) {
 
 		// make sure we don't already have a failed login attempt
-		if ( !strstr($ref, '?login=failed') ) {
+		if ( !strstr($ref, '&login=failed') ) {
 			// Redirect to the login page and append a querystring of login failed
-			wp_redirect( $ref . '?login=failed' );
+			wp_redirect( $ref . '&login=failed' );
 		} else { wp_redirect( $ref ); }
 		exit;
 
@@ -917,7 +924,7 @@ function hce_project_emission_transport() {
 function hce_form() {
 	$cfield_prefix = '_hce_project_';
 
-	if ( !is_user_logged_in() ) { // if user is logged in, then hce form
+	if ( !is_user_logged_in() ) { // if user is not logged in, then login form
 		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_GET['redirect_to']); }
 		else { $redirect_url = site_url( $_SERVER['REQUEST_URI'] ); }
 		$login_form = hce_login_form($redirect_url);
