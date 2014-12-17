@@ -65,12 +65,17 @@ function hce_theme_setup() {
 	add_action( 'init', 'hce_db_emissions_table_populate', 100 );
 	add_action( 'init', 'hce_db_materials_table_populate', 100 );
 
+	// hook failed login
+	add_action( 'wp_login_failed', 'hce_login_failed' );
+	// redirect to right log in page when blank username or password
+	add_action( 'authenticate', 'hce_blank_login');
+
 } // end hce theme setup function
 
 // USER functions
 // display login form
 function hce_login_form( $redirect_url = '' ) {	
-	$login_action = HCE_BLOGURL."/wp-login.php";
+	$login_action = wp_login_url($redirect_url);
 	$form_out = "
 	<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
 		<div class='form-horizontal col-md-12'>
@@ -95,7 +100,6 @@ function hce_login_form( $redirect_url = '' ) {
 			<div class='col-sm-2'>
 				<div class='pull-right'>
 					<input id='wp-submit' class='btn btn-primary' type='submit' value='Iniciar sesión' name='wp-submit' />
-					<input type='hidden' value='".$redirect_url."' name='redirect_to' />
 				</div>
     			</div>
 		</fieldset>
@@ -103,8 +107,49 @@ function hce_login_form( $redirect_url = '' ) {
 	</form>
 	";
 	return $form_out;
-
+//	$args = array('redirect' => $redirect_url);
+//	return wp_login_form($args);
 } // end display login form
+
+// redirect to right log in page when log in failed
+function hce_login_failed( $user ) {
+	// check what page the login attempt is coming from
+	$ref = $_SERVER['HTTP_REFERER'];
+
+	// check that were not on the default login page
+	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $user!=null ) {
+		// make sure we don't already have a failed login attempt
+		if ( !strstr($ref, '?login=failed' )) {
+			// Redirect to the login page and append a querystring of login failed
+			wp_redirect( $ref . '?login=failed');
+		} else { wp_redirect( $ref ); }
+
+		exit;
+	}
+} // end redirect to right log in page when log in failed
+
+// redirect to right log in page when blank username or password
+function hce_blank_login( $user ){
+	// check what page the login attempt is coming from
+	$ref = $_SERVER['HTTP_REFERER'];
+
+	$error = false;
+
+	if($_POST['log'] == '' || $_POST['pwd'] == '') { $error = true; }
+
+  	// check that were not on the default login page
+	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $error ) {
+
+		// make sure we don't already have a failed login attempt
+		if ( !strstr($ref, '?login=failed') ) {
+			// Redirect to the login page and append a querystring of login failed
+			wp_redirect( $ref . '?login=failed' );
+		} else { wp_redirect( $ref ); }
+		exit;
+
+	}
+
+} // end redirect to right log in page when blank username or password
 
 // set up media options
 function hce_media_options() {
