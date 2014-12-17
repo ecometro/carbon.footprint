@@ -557,7 +557,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 			$type = sanitize_text_field($_POST['hce-form-step3-transport-'.$topten_fields[2]."-".$w_count]);
 			$topten_data[$key] = array(
 				'distance' => $distance,
-				'emission' => $type
+				'emission' => $type * 0.001 // transform emission/ton into emission/kg
 			);
 			$w_count++;
 		}
