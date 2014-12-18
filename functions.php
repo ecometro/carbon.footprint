@@ -74,12 +74,15 @@ function hce_theme_setup() {
 
 // USER functions
 // display login form
-function hce_login_form( $redirect_url = '' ) {	
+function hce_login_form( $redirect_url = '' ) {
 	$login_action = wp_login_url($redirect_url);
 
 	if ( array_key_exists('login',$_GET) ) {
+		$lost_pass_url = wp_lostpassword_url(get_permalink()."?login=lost-password");
 		$login_fail = sanitize_text_field($_GET['login']);
-		if ( $login_fail == 'failed' ) { $feedback_type = "danger"; $feedback_text = "El nombre de usuario o la contraseña no son correctos. Por favor, inténtalo de nuevo. Si olvidaste tu contraseña, puedes solicitar una nueva."; }
+		if ( $login_fail == 'failed' ) { $feedback_type = "danger"; $feedback_text = "El nombre de usuario o la contraseña no son correctos. Por favor, inténtalo de nuevo. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
+		if ( $login_fail == 'empty' ) { $feedback_type = "danger"; $feedback_text = "No rrellenaste el nombre de usuario o la contraseña; necesitamos ambos para iniciar tu sesión. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
+		elseif ( $login_fail == 'lost-password' ) { $feedback_type = "info"; $feedback_text = "<strong>Hemos enviado una nueva contraseña a tu dirección de correo</strong>. Debería llegar a tu buzón en un minuto; recuerda que puede haber ido a la carpeta de spam."; }
 		$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
 	} else { $feedback_out = ""; }
 
@@ -122,13 +125,14 @@ function hce_login_form( $redirect_url = '' ) {
 function hce_login_failed( $user ) {
 	// check what page the login attempt is coming from
 	$ref = $_SERVER['HTTP_REFERER'];
+	$ref = preg_replace("/\?.*$/","",$ref);
 
 	// check that were not on the default login page
 	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $user!=null ) {
 		// make sure we don't already have a failed login attempt
-		if ( !strstr($ref, '&login=failed' )) {
+		if ( !strstr($ref, '?login=failed' )) {
 			// Redirect to the login page and append a querystring of login failed
-			wp_redirect( $ref . '&login=failed');
+			wp_redirect( $ref . '?login=failed');
 		} else { wp_redirect( $ref ); }
 
 		exit;
@@ -139,6 +143,7 @@ function hce_login_failed( $user ) {
 function hce_blank_login( $user ){
 	// check what page the login attempt is coming from
 	$ref = $_SERVER['HTTP_REFERER'];
+	$ref = preg_replace('/\?.*$/','',$ref);
 
 	$error = false;
 
@@ -148,9 +153,9 @@ function hce_blank_login( $user ){
 	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $error ) {
 
 		// make sure we don't already have a failed login attempt
-		if ( !strstr($ref, '&login=failed') ) {
+		if ( !strstr($ref, '?login=empty') ) {
 			// Redirect to the login page and append a querystring of login failed
-			wp_redirect( $ref . '&login=failed' );
+			wp_redirect( $ref . '?login=empty' );
 		} else { wp_redirect( $ref ); }
 		exit;
 
