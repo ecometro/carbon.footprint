@@ -75,51 +75,178 @@ function hce_theme_setup() {
 // USER functions
 // display login form
 function hce_login_form( $redirect_url = '' ) {
+	$redirect_url = preg_replace("/\?.*$/","",$redirect_url);
 	$login_action = wp_login_url($redirect_url);
+	$register_url = get_permalink()."?action=register";
 
-	if ( array_key_exists('login',$_GET) ) {
-		$lost_pass_url = wp_lostpassword_url(get_permalink()."?login=lost-password");
-		$login_fail = sanitize_text_field($_GET['login']);
-		if ( $login_fail == 'failed' ) { $feedback_type = "danger"; $feedback_text = "El nombre de usuario o la contraseña no son correctos. Por favor, inténtalo de nuevo. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
-		if ( $login_fail == 'empty' ) { $feedback_type = "danger"; $feedback_text = "No rrellenaste el nombre de usuario o la contraseña; necesitamos ambos para iniciar tu sesión. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
-		elseif ( $login_fail == 'lost-password' ) { $feedback_type = "info"; $feedback_text = "<strong>Hemos enviado una nueva contraseña a tu dirección de correo</strong>. Debería llegar a tu buzón en un minuto; recuerda que puede haber ido a la carpeta de spam."; }
-		$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
-	} else { $feedback_out = ""; }
+	if ( array_key_exists('action',$_GET) && sanitize_text_field($_GET['action']) == 'register' ) { // if action is register
+		return hce_register_form();
 
+	} else { // if action is log in
+
+		if ( array_key_exists('login',$_GET) ) {
+			$lost_pass_url = wp_lostpassword_url(get_permalink()."?login=lost-password");
+			$login_fail = sanitize_text_field($_GET['login']);
+			if ( $login_fail == 'failed' ) { $feedback_type = "danger"; $feedback_text = "El nombre de usuario o la contraseña no son correctos. Por favor, inténtalo de nuevo. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
+			if ( $login_fail == 'empty' ) { $feedback_type = "danger"; $feedback_text = "No rellenaste el nombre de usuario o la contraseña; necesitamos ambos para iniciar tu sesión. Si olvidaste tu contraseña, puedes <a class='btn btn-default' href='".$lost_pass_url."'>solicitar una nueva</a>"; }
+			elseif ( $login_fail == 'lost-password' ) { $feedback_type = "info"; $feedback_text = "<strong>Hemos enviado una nueva contraseña a tu dirección de correo</strong>. Debería llegar a tu buzón en un minuto; recuerda que puede haber ido a la carpeta de spam."; }
+			$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
+
+		} elseif ( array_key_exists('register',$_GET) ) {
+			$register_fail = sanitize_text_field($_GET['register']);
+			if ( $register_fail == 'success' ) { $feedback_type = "success"; $feedback_text = "<strong>¡Bien!</strong> Te has registrado con éxito. Ahora puedes iniciar sesión y evaluar un proyecto."; }
+			$feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>";
+
+		} else { $feedback_out = ""; }
+	
+		$form_out = $feedback_out. "
+		<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
+			<div class='form-horizontal col-md-12'>
+			<fieldset class='form-group'>
+				<label for='user_login' class='col-sm-3 control-label'>Nombre de usuario</label>
+				<div class='col-sm-5'>
+					<input id='user_login' class='form-control' type='text' value='' name='log' />
+				</div>
+			</fieldset>
+			<fieldset class='form-group'>
+				<label for='user_pass' class='col-sm-3 control-label'>Contraseña</label>
+				<div class='col-sm-5'>
+					<input id='user_pass' class='form-control' type='password' size='20' value='' name='pwd' />
+				</div>
+			</fieldset>
+			<fieldset class='form-group'>
+				<div class='col-sm-offset-3 col-sm-3 checkbox'>
+					<label>
+						<input id='rememberme' type='checkbox' value='forever' name='rememberme' /> Recuérdame
+					</label>
+				</div>
+				<div class='col-sm-2'>
+					<div class='pull-right'>
+						<input id='wp-submit' class='btn btn-primary' type='submit' value='Inicia sesión' name='wp-submit' />
+					</div>
+	    			</div>
+			</fieldset>
+			</div>
+		</form>
+		<div class='row'>
+			<div class='col-md-5 col-md-offset-3'>
+				<div class='pull-right'>
+					Si no tienes cuenta aún: <a class='btn btn-success' href='".$register_url."'>Regístrate</a>
+				</div>
+			</div>
+		</div>
+		";
+		return $form_out;
+
+	} // end if action register or log in
+} // end display login form
+
+// display register form
+function hce_register_form( $redirect_url = '' ) {
+	$register_action = get_permalink()."?action=register";
+	$login_url = get_permalink()."?action=login";
+
+	if ( array_key_exists('wp-submit',$_POST) && sanitize_text_field($_POST['wp-submit']) == 'Regístrate' ) {
+		$username = sanitize_text_field($_POST['user_login']);
+		$email = sanitize_text_field($_POST['user_email']);
+		$pass = sanitize_text_field($_POST['user_pass']);
+		$pass2 = sanitize_text_field($_POST['user_pass_confirm']);
+		$office = sanitize_text_field($_POST['user_office']);
+		$website = sanitize_text_field($_POST['user_website']);
+
+		if ( username_exists($username) ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>El nombre de usuario que elegiste ya existe</strong>. Tendrás que elegir otro.";
+
+		} elseif ( validate_username($username) === false ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>El nombre de usuario que elegiste no es válido</strong>. Los nombres de usuario solo pueden estar formados por caracteres alfanuméricos.";
+
+		} elseif ( email_exists($email) ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>La dirección de correo que elegiste ya está asociada a otro usuario</strong>. Tendrás que usar otra.";
+
+		} elseif ( $username == '' || $email == '' ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>Alguno de los campos requeridos para el registro no fueron rellenados</strong>. Solo son dos: vuelve a intentarlo.";
+
+		} elseif ( $pass != '' && $pass != $pass2 ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>La contraseña no coincide</strong>. Inténtalo otra vez.";
+
+		} else { $feedback_type = ""; }
+
+		if ( $feedback_type != "" ) { $feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>"; }
+		else {
+			if ( $pass == '' ) { $pass = wp_generate_password( 12, false ); }
+			$user_id = wp_create_user( $username, $pass, $email );
+			wp_redirect(get_permalink()."?action=login&register=success");
+			exit;
+		}
+
+	} else { $username = ""; $email = ""; $office = ""; $website = ""; $feedback_out = ""; }
+
+	$req_class = " <span class='glyphicon glyphicon-asterisk'></span>";
 	$form_out = $feedback_out. "
-	<form class='row' id='loginform' name='loginform' method='post' action='" .$login_action. "' role='form'>
+	<form class='row' name='registerform' action='".$register_action."' method='post'>
 		<div class='form-horizontal col-md-12'>
 		<fieldset class='form-group'>
-			<label for='user_login' class='col-sm-3 control-label'>Nombre de usuario</label>
+			<label for='user_login' class='col-sm-3 control-label'>Nombre de usuario ".$req_class."</label>
 			<div class='col-sm-5'>
-				<input id='user_login' class='form-control' type='text' value='' name='log' />
+				<input id='user_login' class='form-control' type='text' value='".$username."' name='user_login' />
 			</div>
+			<p class='help-block col-sm-4'><small><span class='glyphicon glyphicon-asterisk'></span> Campos requeridos.<br /><strong>Sin espacios, sin caracteres especiales</strong>.</small></p>
 		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_email' class='col-sm-3 control-label'>Correo electrónico ".$req_class."</label>
+			<div class='col-sm-5'>
+				<input id='user_email' class='form-control' type='text' value='".$email."' name='user_email' />
+			</div>
+			<p class='help-block col-sm-4'><small><strong>Para enviarte una nueva contraseña</strong> en caso de que lo necesites: no enviamos spam ni vendemos tus datos.</small></p>
+		</fieldset>
+		</fieldset class='hidden'>
 		<fieldset class='form-group'>
 			<label for='user_pass' class='col-sm-3 control-label'>Contraseña</label>
 			<div class='col-sm-5'>
-				<input id='user_pass' class='form-control' type='password' size='20' value='' name='pwd' />
+				<input id='user_pass' class='form-control' type='password' size='20' value='' name='user_pass' />
+			</div>
+			<p class='help-block col-sm-4'><small>No rellenes este campo si quieres recibir una contraseña generada automáticamente en tu dirección de correo electrónico.</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_pass_confirm' class='col-sm-3 control-label'>Confirma la contraseña</label>
+			<div class='col-sm-5'>
+				<input id='user_pass_confirm' class='form-control' type='password' size='20' value='' name='user_pass_confirm' />
+			</div>
+			<p class='help-block col-sm-4'><small><strong>Elige una contraseña fuerte</strong>: incluye letras y números, mayúsculas y minúsculas, caracteres especiales.</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_office' class='col-sm-3 control-label'>Equipo de proyecto</label>
+			<div class='col-sm-5'>
+				<input id='user_office' class='form-control' type='text' value='".$office."' name='user_office' />
+			</div>
+			<p class='help-block col-sm-4'><small>¿Quién ha realizado el proyecto a evaluar?</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_website' class='col-sm-3 control-label'>Página web</label>
+			<div class='col-sm-5'>
+				<input id='user_website' class='form-control' type='text' value='".$website."' name='user_website' />
 			</div>
 		</fieldset>
 		<fieldset class='form-group'>
-			<div class='col-sm-offset-3 col-sm-3 checkbox'>
-				<label>
-					<input id='rememberme' type='checkbox' value='forever' name='rememberme' /> Recuérdame
-				</label>
-			</div>
-			<div class='col-sm-2'>
+			<div class='col-sm-offset-3 col-sm-5'>
 				<div class='pull-right'>
-					<input id='wp-submit' class='btn btn-primary' type='submit' value='Iniciar sesión' name='wp-submit' />
+					<input id='wp-submit' class='btn btn-success' type='submit' value='Regístrate' name='wp-submit' />
 				</div>
     			</div>
 		</fieldset>
 		</div>
 	</form>
+	<div class='row'>
+		<div class='col-md-5 col-md-offset-3'>
+			<div class='pull-right'>
+				¿Ya tienes cuenta? <a class='btn btn-primary' href='".$login_url."'>Inicia sesión</a>
+			</div>
+		</div>
+	</div>
 	";
 	return $form_out;
-//	$args = array('redirect' => $redirect_url);
-//	return wp_login_form($args);
-} // end display login form
+
+} // end display register form
 
 // redirect to right log in page when log in failed
 function hce_login_failed( $user ) {
@@ -146,8 +273,8 @@ function hce_blank_login( $user ){
 	$ref = preg_replace('/\?.*$/','',$ref);
 
 	$error = false;
-
-	if($_POST['log'] == '' || $_POST['pwd'] == '') { $error = true; }
+	if( array_key_exists('log',$_POST) && sanitize_text_field($_POST['log']) == '' ||
+	array_key_exists('log',$_POST) && sanitize_text_field($_POST['pwd']) == '') { $error = true; }
 
   	// check that were not on the default login page
 	if ( !empty($ref) && !strstr($ref,'wp-login') && !strstr($ref,'wp-admin') && $error ) {
