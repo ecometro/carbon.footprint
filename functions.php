@@ -338,6 +338,7 @@ function hce_load_scripts() {
 // load scripts for IE compatibility
 function hce_ie_scripts() {
 	echo "
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
