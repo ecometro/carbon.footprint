@@ -175,6 +175,9 @@ function hce_register_form( $redirect_url = '' ) {
 		else {
 			if ( $pass == '' ) { $pass = wp_generate_password( 12, false ); }
 			$user_id = wp_create_user( $username, $pass, $email );
+			if ( $office != '' ) { update_user_meta( $user_id, 'first_name', $office ); }
+			if ( $website != '' ) { update_user_meta( $user_id, 'user_url', $website ); }
+
 			wp_redirect(get_permalink()."?action=login&register=success");
 			exit;
 		}
