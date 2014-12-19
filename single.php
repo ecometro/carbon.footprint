@@ -21,7 +21,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		<dt>Evaluado por</dt><dd>".$username."</dd>
 		".$office_out."
 	</dl>
-	<p><a class='btn btn-xs btn-default' href='".$author_projects_url."'>Más proyectos de ".$username."</a></p>
+	<p><a class='btn btn-xs btn-default' href='".$author_projects_url."'><span class='glyphicon glyphicon-plus'></span> Proyectos de ".$username."</a></p>
 	</div>
 	";
 
@@ -30,15 +30,26 @@ $visibility_switcher_out = hce_project_visibility_switcher();
 
 	// edit project link
 	if ( is_user_logged_in() && get_current_user_id() == $post->post_author ) {
-		$edit_link_out = "<p><a class='btn btn-default btn-xs' href='/calculo-huella-carbono/?step=1&project_id=".$post->ID."'>Editar proyecto</a></p>";
+		$edit_link_out = "<p><a class='btn btn-default btn-xs' href='/calculo-huella-carbono/?step=1&project_id=".$post->ID."'><span class='glyphicon glyphicon-pencil'></span> Editar proyecto</a></p>";
 	} else { $edit_link_out = ""; }
 
 	// view complete dossier link
 	if ( array_key_exists('view',$_GET) ) { $view = sanitize_text_field($_GET['view']); } else { $view = ""; }
 	if ( is_user_logged_in() && get_current_user_id() == $post->post_author && $post->post_status != 'draft' ) {
-		if ( $view == 'dossier' ) { $dossier_link_text = "Ver resumen de resultados"; $dossier_link = "results"; }
-		else { $dossier_link_text = "Ver informe completo"; $dossier_link = "dossier"; }
-		$dossier_link_out = "<p><a class='btn btn-default btn-xs' href='?view=".$dossier_link."'>".$dossier_link_text."</a></p>";
+		if ( $view == 'dossier' ) {
+			$dossier_current = "<span class='btn btn-xs btn-info' disabled='disabled'>Vista informe</span>";
+			$dossier_link_text = "<span class='glyphicon glyphicon-align-left'></span> Cambiar a vista resumen";
+			$dossier_link = "results";
+		} else {
+			$dossier_current = "<span class='btn btn-xs btn-info' disabled='disabled'>Vista resumen</span>";
+			$dossier_link_text = "<span class='glyphicon glyphicon-file'></span> Cambiar a vista informe";
+			$dossier_link = "dossier";
+		}
+		$dossier_link_out = "
+			<p>".$dossier_current."</p>
+			<p><a class='btn btn-default btn-xs' href='?view=".$dossier_link."'>".$dossier_link_text."</a></p>
+			<p><a class='btn btn-default btn-xs' href='#'><span class='glyphicon glyphicon-print'></span> Imprimir informe</a></p>
+		";
 	} else { $dossier_link_out = ""; }
 
 

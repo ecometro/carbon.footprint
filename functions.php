@@ -1813,25 +1813,27 @@ function hce_project_visibility_switcher() {
 			$current_status = "público";
 			$current_class = "success";
 			$change_status = "privado";
+			$change_icon = "eye-close";
 
 		} elseif ( $post->post_status == 'private' ) {
 			$action .= "?visibility=publish";
 			$current_status = "privado";
 			$current_class = "danger";
 			$change_status = "público";
+			$change_icon = "eye-open";
 
 		}
 
 		// action button
 		if ( $change_status != '' ) {
-			$action_button = "<li><a class='btn btn-default btn-xs' href='".$action."'>Hacer proyecto ".$change_status."</a></li>";
+			$action_button = "<p><a class='btn btn-default btn-xs' href='".$action."'><span class='glyphicon glyphicon-".$change_icon."'></span> Hacer proyecto ".$change_status."</a></p>";
 		} else { $action_button = ""; }
 
 		$visibility_switcher = $feedback_out."
-		<ul id='dossier-visibility' class='list-unstyled dossier-group'>
-			<li><strong>Visibilidad</strong><br /> <span class='btn btn-".$current_class." btn-xs' disabled='disabled'>Proyecto ".$current_status."</span></li>
+		<div id='dossier-visibility' class='dossier-group'>
+			<p><span class='btn btn-".$current_class." btn-xs' disabled='disabled'>Proyecto ".$current_status."</span></p>
 			" .$action_button. "
-		</ul>
+		</div>
 		";
 	
 	} else { $visibility_switcher = ""; }
