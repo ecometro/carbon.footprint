@@ -4,8 +4,29 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$project_id = $post->ID;
 	$project_name = get_the_title();
 
+	// user data
+	$author_id = get_the_author_meta( 'ID' );
+	$username = get_the_author_meta( 'user_login' );
+	$office = get_the_author_meta( 'first_name' );
+	$web = get_the_author_meta( 'user_url' );
+//	$author_bio = get_the_author_meta( 'description' );
+	$author_projects_url = get_author_posts_url($author_id);
+	if ( $office != '' && $web != '' ) { $office_out = "<dt>Equipo</dt><dd><a href='".$web."'>".$office."</a></dd>"; }
+	elseif ( $office != '' && $web == '' ) { $office_out = "<dt>Equipo</dt><dd>".$office."</dd>"; }
+	elseif ( $office == '' && $web != '' ) { $office_out = "<dt>Web</dt><dd><a href='".$web."'>".$web."</a></dd>"; }
+	else { $office_out = ""; }
+	$author_out = "
+	<div id='dossier-author'>
+	<dl>
+		<dt>Evaluado por</dt><dd>".$username."</dd>
+		".$office_out."
+	</dl>
+	<p><a class='btn btn-xs btn-default' href='".$author_projects_url."'>Más proyectos de ".$username."</a></p>
+	</div>
+	";
+
 	// visibility switcher
-	$visibility_switcher_out = hce_project_visibility_switcher();
+$visibility_switcher_out = hce_project_visibility_switcher();
 
 	// edit project link
 	if ( is_user_logged_in() && get_current_user_id() == $post->post_author ) {
@@ -165,7 +186,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 
 <main class="row" role="main">
 	<div id="dossier-meta" class="col-sm-2">
-		<?php echo $dossier_link_out.$edit_link_out.$visibility_switcher_out; ?>
+		<?php echo $author_out.$dossier_link_out.$edit_link_out.$visibility_switcher_out; ?>
 	</div>
 	<div id="dossier-data" class="col-sm-10">
 		<?php if ( $view == 'dossier' ) { include "project-dossier.php"; } ?>
