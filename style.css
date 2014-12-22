@@ -105,3 +105,13 @@ body { padding-top: 70px; }
 .list-heading {
 	margin-top: 0;
 }
+
+/* dossier print styles */
+@media print {
+	.page-break {
+		page-break-after: always;
+	}
+	.dossier-meta {
+		text-align: center;
+	}
+}

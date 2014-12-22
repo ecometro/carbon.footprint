@@ -1,4 +1,4 @@
-<footer id="epi" class="row">
+<footer id="epi" class="row hidden-print">
 	<div class="epi-content col-md-12">
 		<ul class="list-inline">
 		<li class="text-muted"><strong>Una iniciativa de</strong><br /><a href="http://www.sostenibilidadyarquitectura.com/"><img src="<?php echo HCE_BLOGTHEME."/images/logo.asa.png" ?>" alt="Logo de la Asociación Sostenibilidad y Arquitectura" /></a></li>

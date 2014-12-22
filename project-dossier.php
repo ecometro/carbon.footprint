@@ -94,7 +94,7 @@ En el caso de una edificación (entendido el edificio como un producto) el ciclo
 <p>En cualquier caso, el presente cálculo es un primer paso en la estimación de la Huella de Carbono en la construcción de las edificaciones; a medida que las instituciones, técnicos y mercado en general vayan avanzando en la materia y poco a poco vaya habiendo más información ambiental -a través de las Declaraciones Ambientales de Producto-, la cifra resultante será cada vez más exacta y será viable incluir la ETAPA DE USO Y MANTENIMIENTO de los materiales, así como la de FIN DE VIDA, tanto de los materiales como del propio edificio.</p>
 </section>
 
-<section class="dossier-section" id="dossier-herramienta">
+<section class="dossier-section page-break" id="dossier-herramienta">
 <header><h2>Herramienta arCO<sub>2</sub></h2></header>
 <p>arCo2 permite calcular la Huella de Carbono del ciclo de vida del proyecto de edificación de una manera rápida y sencilla, minimizando errores de transcripción y reduciendo el grado de incertidumbre.</p>
 <p>La calidad de los datos se asegura teniendo en cuenta:</p>
