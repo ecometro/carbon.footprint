@@ -155,14 +155,15 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$built_area = get_post_meta($project_id,$cfield_prefix."built-area",TRUE);
 	$budget = get_post_meta($project_id,$cfield_prefix."budget",TRUE);
 	$weight = get_post_meta($project_id,$cfield_prefix."mass_total",TRUE);
-	$e_per_user = round($emissions_total/$users);
-	$e_per_m2 = round($emissions_total/$built_area);
-	$e_per_e = round($emissions_total/$budget);
-	$e_per_kg = round($emissions_total/$weight);
-	$circles[$e_per_user] = array("users","kg CO<sub>2</sub> eq emitidos por usuario. <strong><nobr>Usuarios: ".$users."</nobr></strong>");
-	$circles[$e_per_m2] = array("built-area","kg CO<sub>2</sub> eq emitidos por m2 de superficie construida. <strong><nobr>Superficies construida: ".$built_area." m<sub>2</sub></nobr></strong>");
-	$circles[$e_per_e] = array("budget","kg CO<sub>2</sub> eq emitidos por cada euro gastado. <strong><nobr>Presupuesto: ".$budget." €</nobr></strong>");
-	$circles[$e_per_kg] = array("weight","kg CO<sub>2</sub> eq emitidos por cada kilogramo de edificio. <strong><nobr>Peso: ".$weight." kg</nobr></strong>");
+	$e_per_user = round($emissions_total/$users,2);
+	$e_per_m2 = round($emissions_total/$built_area,2);
+	$e_per_e = round($emissions_total/$budget,2);
+	$e_per_kg = round($emissions_total/$weight,2);
+	$circles["'".$e_per_user."'"] = array("users","kg CO<sub>2</sub> eq emitidos por usuario. <strong><nobr>Usuarios: ".$users."</nobr></strong>");
+	$circles["'".$e_per_m2."'"] = array("built-area","kg CO<sub>2</sub> eq emitidos por m2 de superficie construida. <strong><nobr>Superficies construida: ".$built_area." m<sub>2</sub></nobr></strong>");
+	$circles["'".$e_per_e."'"] = array("budget","kg CO<sub>2</sub> eq emitidos por cada euro gastado. <strong><nobr>Presupuesto: ".$budget." €</nobr></strong>");
+	$circles["'".$e_per_kg."'"] = array("weight","kg CO<sub>2</sub> eq emitidos por cada kilogramo de edificio. <strong><nobr>Peso: ".$weight." kg</nobr></strong>");
+echo "<pre>";print_r($circles);echo "</pre>";
 	if ( $view == 'dossier' ) { // if dossier view and printed version
 		$circles_out = "<ul class='list-unstyled'>";
 		foreach ( $circles as $e => $texts ) {
@@ -175,6 +176,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$circles_out = array();
 		$c_count = 0;
 		foreach ( $circles as $e => $texts ) {
+			$e = preg_replace("/'/","",$e); // to recover float value, without '
 			$c_count++;
 			$r = sqrt( $e/M_PI );
 			if ( $c_count == 1 ) { $c_max = $r; }
