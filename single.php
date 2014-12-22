@@ -86,6 +86,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	FROM $table_p
 	WHERE emission != 0
 	  OR emission_transport != 0
+	ORDER BY section_code
 	";
 	$query_results = $wpdb->get_results( $sql_query , ARRAY_A );
 //echo "<pre>";
