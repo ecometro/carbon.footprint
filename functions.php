@@ -1559,7 +1559,7 @@ function hce_db_emissions_table() {
 
 // create materials table in DB
 global $materials_ver;
-$materials_ver = "0.2";
+$materials_ver = "0.3";
 function hce_db_materials_table() {
 	global $wpdb;
 	global $materials_ver;
@@ -1831,7 +1831,7 @@ function hce_project_visibility_switcher() {
 		} else { $action_button = ""; }
 
 		$visibility_switcher = $feedback_out."
-		<div id='dossier-visibility' class='dossier-group'>
+		<div id='dossier-visibility' class='hidden-print'>
 			<p><span class='btn btn-".$current_class." btn-xs' disabled='disabled'>Proyecto ".$current_status."</span></p>
 			" .$action_button. "
 		</div>
