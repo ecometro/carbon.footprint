@@ -577,7 +577,7 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 
 		$line = 0;
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
-			$material_code = mb_convert_encoding($fp_csv[0], "UTF-8");
+			$material_code = utf8_encode($fp_csv[0]);
 			if ( preg_match('/^[M,P,O][0-9][0-9]/',$material_code) == 1 ) {
 				// preparing data to insert
 				$material_amount = str_replace(",",".",$fp_csv[3]);
@@ -587,17 +587,17 @@ function hce_project_populate_table($project_id,$csv_file_id) {
 				$data = array(
 					//'id' => is autoincrement
 					'material_code' => $material_code,
-					'material_name' => mb_convert_encoding($fp_csv[2], "UTF-8"),
-					'material_amount' => mb_convert_encoding($material_amount, "UTF-8"),
-					'material_unit' => mb_convert_encoding($fp_csv[1], "UTF-8"),
-					'construction_unit_code' => mb_convert_encoding($fp_csv[4], "UTF-8"),
-					'construction_unit_name' => mb_convert_encoding($fp_csv[6], "UTF-8"),
-					'construction_unit_amount' => mb_convert_encoding($construction_unit_amount, "UTF-8"),
-					'construction_unit_unit' => mb_convert_encoding($fp_csv[5], "UTF-8"),
-					'section_code' => mb_convert_encoding($fp_csv[10], "UTF-8"),
-					'section_name' => mb_convert_encoding($fp_csv[11], "UTF-8"),
-					'subsection_code' => mb_convert_encoding($fp_csv[8], "UTF-8"),
-					'subsection_name' => mb_convert_encoding($fp_csv[9], "UTF-8")
+					'material_name' => utf8_encode($fp_csv[2]),
+					'material_amount' => utf8_encode($material_amount),
+					'material_unit' => utf8_encode($fp_csv[1]),
+					'construction_unit_code' => utf8_encode($fp_csv[4]),
+					'construction_unit_name' => utf8_encode($fp_csv[6]),
+					'construction_unit_amount' => utf8_encode($construction_unit_amount),
+					'construction_unit_unit' => utf8_encode($fp_csv[5]),
+					'section_code' => utf8_encode($fp_csv[10]),
+					'section_name' => utf8_encode($fp_csv[11]),
+					'subsection_code' => utf8_encode($fp_csv[8]),
+					'subsection_name' => utf8_encode($fp_csv[9])
 				);
 				/* create row */ $wpdb->insert( $table, $data, $format );
 	
