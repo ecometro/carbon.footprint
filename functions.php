@@ -1851,12 +1851,15 @@ function hce_project_display_basic_data($project_id) {
 		$value[$field] = get_post_meta($project_id,$cfield_prefix.$field,TRUE);
 	}
 	$value['desc'] = get_the_content();
+	if ( $value['address'] != '' ) { $value['address'] .= ", "; }
+	if ( $value['city'] != '' ) { $value['city'] .= ". "; }
+	if ( $value['cp'] != '' ) { $value['city'] .= " "; }
 	$basic_fields = array(
 		array(
 			'label' => 'Localización',
 			'unit' => '',
 			'group' => 1,
-			'value' => $value['address']. ", " .$value['city']. ". " .$value['cp']. " " .$value['state']
+			'value' => $value['address'].$value['city'].$value['cp'].$value['state']
 		),
 		array(
 			'label' => 'Uso',
