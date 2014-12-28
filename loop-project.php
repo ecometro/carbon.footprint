@@ -3,7 +3,6 @@ $project_perma = get_permalink();
 $project_tit = get_the_title();
 $project_desc = get_the_excerpt();
 $project_emission = round( get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true) );
-$project_emission = "8399870";
 
 if ( $post->post_status != 'draft' ) {
 	$project_featured = "
