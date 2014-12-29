@@ -67,15 +67,26 @@ wp_head(); ?>
 			<ul id="navbar-third" class="nav navbar-nav navbar-right">
 				<?php if ( is_user_logged_in() ) {
 					$user_id = get_current_user_id();
+					global $current_user;
+					get_currentuserinfo();
+					$user_name = $current_user->user_login;
 					$user_projects_url = get_author_posts_url($user_id);
+					$user_profile_edit = "";
 					$user_loginout_url = wp_logout_url($_SERVER['REQUEST_URI']);
 					$user_loginout_text = "Cierra tu sesión"; ?>
-					<li id="user-projects"><a href="<?php echo $user_projects_url; ?>">Mis proyectos</a></li>
+					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> Hola, <strong><?php echo $user_name ?></strong> <span class="caret"></span></a>
+						<ul class="dropdown-menu" role="menu">
+						<li id="user-projects"><a href="<?php echo $user_projects_url; ?>">Mis proyectos</a></li>
+						<li id="user-profile-edit"><a href="<?php echo $user_profile_edit; ?>">Editar mis datos</a></li>
+						<li class="divider"></li>
+						<li><a href="<?php echo $user_loginout_url?>"><?php echo $user_loginout_text ?></a></li>
+						</ul>
+					</li>
 				<?php } else {
 					$user_loginout_url = HCE_BLOGURL."/calculo-huella-carbono/?redirect_to=".$_SERVER['REQUEST_URI'];
-					$user_loginout_text = "Accede / regístrate ";
-				} ?>
+					$user_loginout_text = "Accede / regístrate "; ?>
 					<li><a href="<?php echo $user_loginout_url?>"><span class="glyphicon glyphicon-user"></span> <?php echo $user_loginout_text ?></a></li>
+				<?php } ?>
 				
 			</ul>
 		</div>
