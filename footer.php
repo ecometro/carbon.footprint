@@ -19,7 +19,6 @@
 		);
 		wp_nav_menu( $args );
 	} ?>
-		<p class="text-muted">Desarrollado por <a href="http://montera34.com">m34</a> usando <a href="#">software libre</a>.</p>
 	</div>
 </footer>
 </div><!-- .container -->
