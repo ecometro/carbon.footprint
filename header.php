@@ -71,7 +71,7 @@ wp_head(); ?>
 					get_currentuserinfo();
 					$user_name = $current_user->user_login;
 					$user_projects_url = get_author_posts_url($user_id);
-					$user_profile_edit = "";
+					$user_profile_edit = "/calculo-huella-carbono?action=edit";
 					$user_loginout_url = wp_logout_url($_SERVER['REQUEST_URI']);
 					$user_loginout_text = "Cierra tu sesión"; ?>
 					<li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-user"></span> Hola, <strong><?php echo $user_name ?></strong> <span class="caret"></span></a>

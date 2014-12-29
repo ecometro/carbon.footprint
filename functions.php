@@ -81,9 +81,10 @@ function hce_login_form( $redirect_url = '' ) {
 
 	if ( array_key_exists('action',$_GET) && sanitize_text_field($_GET['action']) == 'register' ) { // if action is register
 		return hce_register_form();
+	} elseif ( array_key_exists('action',$_GET) && sanitize_text_field($_GET['action']) == 'edit' ) { // if action is edit profile
+		return hce_edit_userdata_form();
 
 	} else { // if action is log in
-
 		if ( array_key_exists('login',$_GET) ) {
 			$lost_pass_url = wp_lostpassword_url(get_permalink()."?login=lost-password");
 			$login_fail = sanitize_text_field($_GET['login']);
@@ -142,7 +143,7 @@ function hce_login_form( $redirect_url = '' ) {
 } // end display login form
 
 // display register form
-function hce_register_form( $redirect_url = '' ) {
+function hce_register_form() {
 	$register_action = get_permalink()."?action=register";
 	$login_url = get_permalink()."?action=login";
 
@@ -202,7 +203,7 @@ function hce_register_form( $redirect_url = '' ) {
 			</div>
 			<p class='help-block col-sm-4'><small><strong>Para enviarte una nueva contraseña</strong> en caso de que lo necesites: no enviamos spam ni vendemos tus datos.</small></p>
 		</fieldset>
-		</fieldset class='hidden'>
+		</fieldset>
 		<fieldset class='form-group'>
 			<label for='user_pass' class='col-sm-3 control-label'>Contraseña</label>
 			<div class='col-sm-5'>
@@ -250,6 +251,133 @@ function hce_register_form( $redirect_url = '' ) {
 	return $form_out;
 
 } // end display register form
+
+// display edit user data form
+function hce_edit_userdata_form() {
+	$edit_userdata_action = get_permalink()."?action=edit";
+//	$register_action = get_permalink()."?action=register";
+//	$login_url = get_permalink()."?action=login";
+
+	if ( array_key_exists('wp-submit',$_POST) && sanitize_text_field($_POST['wp-submit']) == 'Actualizar' ) {
+		global $current_user;
+		get_currentuserinfo();
+
+//		$username = sanitize_text_field($_POST['user_login']);
+		$email = sanitize_text_field($_POST['user_email']);
+		$pass = sanitize_text_field($_POST['user_pass']);
+		$pass2 = sanitize_text_field($_POST['user_pass_confirm']);
+		$office = sanitize_text_field($_POST['user_office']);
+		$website = sanitize_text_field($_POST['user_website']);
+
+//		if ( username_exists($username) ) {
+//			$feedback_type = "danger"; $feedback_text = "<strong>El nombre de usuario que elegiste ya existe</strong>. Tendrás que elegir otro.";
+
+//		} elseif ( validate_username($username) === false ) {
+//			$feedback_type = "danger"; $feedback_text = "<strong>El nombre de usuario que elegiste no es válido</strong>. Los nombres de usuario solo pueden estar formados por caracteres alfanuméricos.";
+
+//		} elseif ( email_exists($email) ) {
+		if ( email_exists($email) && $email != $current_user->user_email ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>La dirección de correo que elegiste ya está asociada a otro usuario</strong>. Tendrás que usar otra.";
+
+//		} elseif ( $username == '' || $email == '' ) {
+		} elseif ( $email == '' ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>El correo electrónico es un campo obligatorio</strong>: no puedes dejarlo en blanco.";
+
+		} elseif ( $pass != '' && $pass != $pass2 ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>La contraseña no coincide</strong>. Inténtalo otra vez.";
+
+		} else { $feedback_type = ""; }
+
+		if ( $feedback_type != "" ) { $feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>"; }
+		else {
+			// current user data
+			$user_id = $current_user->ID;
+			if ( $pass != '' ) { wp_set_password( $pass, $user_id ); }
+			$fields_to_update = array(
+				'ID' => $user_id,
+				'first_name' => $office,
+				'user_email' => $email,
+				'user_url' => $website
+			);
+			$updated_id = wp_update_user( $fields_to_update );
+			wp_redirect(get_permalink()."?action=edit&edit_userdata=success");
+			exit;
+
+		}
+
+	} else { // if form data hasn't been sent
+		// current user data
+		global $current_user;
+		get_currentuserinfo();
+		$username = $current_user->user_login;
+		$email = $current_user->user_email;
+		$website = $current_user->user_url;
+		$office = $current_user->user_firstname;
+//	$author_bio = get_the_author_meta( 'description' );
+
+		if ( array_key_exists('edit_userdata',$_GET) ) {
+			if ( sanitize_text_field($_GET['edit_userdata']) == 'success' ) {
+				$feedback_out = "<div class='alert alert-success' role='alert'>Tus datos de usuario han sido actualizados.</div>";
+			}
+		} else { $feedback_out = ""; }
+	}
+
+	$req_class = " <span class='glyphicon glyphicon-asterisk'></span>";
+	$form_out = $feedback_out. "
+	<form class='row' name='edit_userdata_form' action='".$edit_userdata_action."' method='post'>
+		<div class='form-horizontal col-md-12'>
+		<fieldset class='form-group'>
+			<label for='user_login' class='col-sm-3 control-label'>Nombre de usuario ".$req_class."</label>
+			<div class='col-sm-5'>
+				<input id='user_login' class='form-control' type='text' value='".$username."' name='user_login' disabled='disabled' />
+			</div>
+			<p class='help-block col-sm-4'><small><span class='glyphicon glyphicon-asterisk'></span> Campos requeridos.<br /><strong>El nombre de usuario no se puede cambiar</strong>.</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_email' class='col-sm-3 control-label'>Correo electrónico ".$req_class."</label>
+			<div class='col-sm-5'>
+				<input id='user_email' class='form-control' type='text' value='".$email."' name='user_email' />
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_pass' class='col-sm-3 control-label'>Nueva contraseña</label>
+			<div class='col-sm-5'>
+				<input id='user_pass' class='form-control' type='password' size='20' value='' name='user_pass' />
+			</div>
+			<p class='help-block col-sm-4'><small><strong>Si deseas cambiar la contraseña del usuario</strong>, escribe aquí la nueva. En caso contrario, deja las casillas en blanco.</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_pass_confirm' class='col-sm-3 control-label'>Confirma nueva contraseña</label>
+			<div class='col-sm-5'>
+				<input id='user_pass_confirm' class='form-control' type='password' size='20' value='' name='user_pass_confirm' />
+			</div>
+			<p class='help-block col-sm-4'><small>Recuerda elegir una contraseña fuerte: incluye letras y números, mayúsculas y minúsculas, caracteres especiales.</small></p>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_office' class='col-sm-3 control-label'>Equipo de proyecto</label>
+			<div class='col-sm-5'>
+				<input id='user_office' class='form-control' type='text' value='".$office."' name='user_office' />
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<label for='user_website' class='col-sm-3 control-label'>Página web</label>
+			<div class='col-sm-5'>
+				<input id='user_website' class='form-control' type='text' value='".$website."' name='user_website' />
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
+			<div class='col-sm-offset-3 col-sm-5'>
+				<div class='pull-right'>
+					<input id='wp-submit' class='btn btn-primary' type='submit' value='Actualizar' name='wp-submit' />
+				</div>
+    			</div>
+		</fieldset>
+		</div>
+	</form>
+	";
+	return $form_out;
+
+} // end display edit user data form
 
 // redirect to right log in page when log in failed
 function hce_login_failed( $user ) {
@@ -1060,11 +1188,14 @@ function hce_project_emission_transport() {
 function hce_form() {
 	$cfield_prefix = '_hce_project_';
 
-	if ( !is_user_logged_in() ) { // if user is not logged in, then login form
-		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_GET['redirect_to']); }
+	if ( !is_user_logged_in() || // if user is not logged in, then login form
+		is_user_logged_in() && array_key_exists('action', $_GET) && sanitize_text_field($_GET['action']) == 'edit' // if user profile edition
+	) {
+		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_get['redirect_to']); }
 		else { $redirect_url = site_url( $_SERVER['REQUEST_URI'] ); }
 		$login_form = hce_login_form($redirect_url);
 		return $login_form;
+
 	}
 
 	// form step
