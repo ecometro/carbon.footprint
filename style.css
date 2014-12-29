@@ -40,6 +40,9 @@ body { padding-top: 70px; }
 .logged-in #user-projects a {
 	background-color: #e7e7e7;
 }
+#navbar-third .dropdown {
+	height: 50px;
+}
 
 /* evaluation project form */
 .form-control-feedback {

@@ -1611,7 +1611,7 @@ function hce_form() {
 	if ( $step == 4 ) {
 		$form_out = "
 		<div class='row'>
-			<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
+			<div id='form-steps' class='col-sm-8'>".$nav_btns_out."</div>
 		</div>
 	
 		<div class='row'>
@@ -1634,8 +1634,8 @@ function hce_form() {
 	} else {
 		$form_out = "
 		<div class='row'>
-			<div id='form-steps' class='col-sm-5'>".$nav_btns_out."</div>
-			<div class='col-sm-3'>".$feedback_out."</div>
+			<div id='form-steps' class='col-sm-8'>".$nav_btns_out."</div>
+			<div class='col-sm-4'>".$feedback_out."</div>
 		</div>
 	
 		<form class='row' id='hce-form-step".$step."' method='post' action='" .$action_next. "'" .$enctype_out. ">
