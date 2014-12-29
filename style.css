@@ -18,6 +18,9 @@ Tags: HTML5, CSS3
 
 */
 .textr { text-align: right; }
+.aligncenter {
+	text-align: center;
+}
 
 body { padding-top: 70px; }
 #epi {
@@ -30,6 +33,12 @@ body { padding-top: 70px; }
 }
 .epi-content .list-inline li {
 	padding: 0 10px;
+}
+
+/* menus */
+.current-menu-item a,
+.logged-in #user-projects a {
+	background-color: #e7e7e7;
 }
 
 /* evaluation project form */
