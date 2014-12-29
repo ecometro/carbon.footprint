@@ -1165,12 +1165,14 @@ function hce_project_emission_transport() {
 
 		// calculate transport CO2 emissions for each material in the top ten
 		hce_project_calculate_emissions($project_id,'transport');
-		$args = array(
-			'ID' => $project_id,
-			'post_status' => 'private',
-		);
-		// update project
-		$updated_id = wp_update_post($args);
+		if ( $project->post_status == 'draft' ) {
+			$args = array(
+				'ID' => $project_id,
+				'post_status' => 'private',
+			);
+			// update project
+			$updated_id = wp_update_post($args);
+		}
 		$location .= "?step=4&project_id=".$project_id."feedback=eval_complete";
 		wp_redirect($location);
 		exit;
@@ -1287,7 +1289,7 @@ function hce_form() {
 	if ( $step == 1 ) {
 		$field_names = array("address","city","state","cp","use","built-area","useful-area","adjusted-area","users","budget","energy-label","energy-consumption","co2-emission");
 		if ( $project_id != 0 ) { // if project_id is defined
-			$value['name'] = get_the_title($project_id);
+			$value['name'] = $project['post_title'];
 			$value_desc = $project['post_content'];
 			foreach ( $field_names as $field_name ) {
 				$value[$field_name] = get_post_meta($project_id,$cfield_prefix.$field_name,TRUE);
