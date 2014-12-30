@@ -1,4 +1,4 @@
-v0.3,,,,,,,,,,
+v0.42,,,,,,,,,,
 CÓDIGO,UNIDAD,"MATERIAL BÁSICO","MATERIAL 1","MATERIAL 2","MATERIAL 3",Masa,Masa,Masa,"TOTAL KG","FACTOR DE CALCULO HCE"
 P01AA010,m3,"Tierra vegetal","TIERRA CRUDA",,,2050,,,2050,7
 P01AA011,t,"Tierra vegetal","TIERRA CRUDA",,,1000,,,1000,0
@@ -1854,11 +1854,11 @@ P01MC005,m3,"Mortero cem. gris II/B-M 32,5 M-20/CEM","CEMENTO GRIS",,"ARENA Y GR
 P01MC010,m3,"Mortero cem. gris II/B-M 32,5 M-15/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,1125,2725,0
 P01MC020,m3,"Mortero cem. gris II/B-M 32,5 M-10/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,"1166,66666666667","2766,66666666667",0
 P01MC030,m3,"Mortero cem. gris II/B-M 32,5 M-7,5/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,1200,2800,0
-P01MC040,m3,"Mortero cem. gris II/B-M 32,5 M-5/CEM","MORTERO DE CEMENTO O CAL",,"ARENA Y GRAVA NATURAL",1600,0,"1285,71428571429","2885,71428571429",0
+P01MC040,m3,"Mortero cem. gris II/B-M 32,5 M-5/CEM","MORTERO DE CEMENTO O CAL",,,1600,0,"1285,71428571429","2885,71428571429",0
 P01MC041,m3,"Mortero cem. gris II/B-M 32,5 M-2,5/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,"1333,33333333333","2933,33333333333",0
 P01MC042,m3,"Mortero cem. gris II/B-M 32,5 M-1/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,"1363,63636363636","2963,63636363636",0
 P01MC043,m3,"Mortero cem. gris II/B-P 32,5 N M-2,5/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,"1333,33333333333","2933,33333333333",0
-P01MC045,m3,"Mortero cem. gris II/B-P 32,5 N M-5/CEM","MORTERO DE CEMENTO O CAL",,"ARENA Y GRAVA NATURAL",1600,0,"1285,71428571429","2885,71428571429",0
+P01MC045,m3,"Mortero cem. gris II/B-P 32,5 N M-5/CEM","MORTERO DE CEMENTO O CAL",,,1600,0,"1285,71428571429","2885,71428571429",0
 P01MC046,m3,"Mortero cem. gris II/B-P 32,5 M-40/CEM","CEMENTO GRIS",,"ARENA Y GRAVA NATURAL",1600,0,750,2350,0
 P01MC050,m3,"Mortero cem. blanco BL-II 42,5R M-10/BL","CEMENTO BLANCO",,,0,,,0,0
 P01MC060,m3,"Mortero cem. blanco BL-II 42,5R M-7,5/BL","CEMENTO BLANCO",,,0,,,0,0
@@ -3773,8 +3773,8 @@ P03,,"MATERIALES PARA ESTRUCTURA",,,,,,,0,0
 P03A,,ACERO,,,,,,,0,0
 P03AA,,ALAMBRES,,,,,,,0,0
 P03AAA,,"ALAMBRE DE ATAR",,,,,,,0,0
-P03AAA010,kg,"Alambre atar 3 mm","ACERO GALVANIZADO",,,1,,,1,0
-P03AAA020,kg,"Alambre atar 1,30 mm",ACERO,,,1,,,1,0
+P03AAA010,kg,"Alambre atar 3 mm","ACERO LAMINADO",,,1,,,1,0
+P03AAA020,kg,"Alambre atar 1,30 mm","ACERO LAMINADO",,,1,,,1,0
 P03AAG,,"ALAMBRE GALVANIZADO",,,,,,,0,0
 P03AAG010,kg,"Alambre galvanizado 3,4 mm","ACERO GALVANIZADO",,,1,,,1,0
 P03AAG020,kg,"Alambre galvanizado 2,7 mm","ACERO GALVANIZADO",,,1,,,1,0
@@ -5979,7 +5979,7 @@ P05TO060,u,"Teja Montseny avellana 42x33","TEJA CERAMICA",,,,,,0,0
 P05TP,,"CERÁMICAS PLANAS",,,,,,,0,0
 P05TP008,u,"Teja plana mate envejecida 43x26","TEJA CERAMICA",,,,,,0,0
 P05TP009,u,"Teja plana vitrificada 43x26","TEJA CERAMICA",,,,,,0,0
-P05TP010,u,"Teja plana roja 43x26 cm","TEJA CERAMICA",,,,,,0,0
+P05TP010,u,"Teja plana roja 43x26 cm","TEJA CERAMICA",,,"3,65",,,"3,65",0
 P05TP011,u,"Teja plana marrón 43x26 cm","TEJA CERAMICA",,,,,,0,0
 P05TP015,u,"Teja plana Moneo roja","TEJA CERAMICA",,,,,,0,0
 P05TP030,u,"Teja plana ventilación 43,2x26","TEJA CERAMICA",,,,,,0,0
@@ -6017,7 +6017,7 @@ P05TWM,,"PIEZAS ESPECIALES CERÁMICA PLANA",,,,,,,0,0
 P05TWM010,u,"Teja caballete Alicantina","TEJA CERAMICA",,,,,,0,0
 P05TWM040,u,"Teja plana ventilación roja 46x29","TEJA CERAMICA",,,,,,0,0
 P05TWM050,u,"Teja caballete ebano 46x29","TEJA CERAMICA",,,,,,0,0
-P05TWM080,u,"Caballete teja plana 46x29cm","TEJA CERAMICA",,,,,,0,0
+P05TWM080,u,"Caballete teja plana 46x29cm","TEJA CERAMICA",,,"3,76",,,"3,76",0
 P05TWR,,RASTRELES,,,,,,,0,0
 P05TWR060,m,"Rastrel metálico moleteado","ACERO GALVANIZADO",,,,,,0,0
 P05TWR070,m,"Rastrel pino 25x50","MADERA ASERRADA CONIFERA SECADA AL AIRE",,,"0,00125",,,"0,00125",0
@@ -6073,7 +6073,7 @@ P05TWX200,u,"Caballete Serena","TEJA CERAMICA",,,,,,0,0
 P05TWX205,u,"Remate lateral Serena","TEJA CERAMICA",,,,,,0,0
 P05TWX250,u,"Teja caballete cerámica 50x32 vieja","TEJA CERAMICA",,,,,,0,0
 P05TWX260,u,"Teja caballete roja 50x32","TEJA CERAMICA",,,,,,0,0
-P05TWX270,u,"Teja remate lateral cerámica roja","TEJA CERAMICA",,,,,,0,0
+P05TWX270,u,"Teja remate lateral cerámica roja","TEJA CERAMICA",,,"2,5",,,"2,5",0
 P05TWX280,u,"Remate lateral vieja","TEJA CERAMICA",,,,,,0,0
 P05TWX290,u,"Teja caballete 3 aguas mixta","TEJA CERAMICA",,,,,,0,0
 P05W,,"PANELES SANDWICH",,,,,,,0,0
@@ -6991,7 +6991,7 @@ P07TV274,m2,"Panel l.v. PV Acustiver e=75mm 1350x600","LANA DE VIDRIO",,,"5,25",
 P07TV280,m2,"Panel l.v. PV Acustiver Papel e=50mm 1350x600","LANA DE VIDRIO",,,"3,5",,,"3,5",0
 P07TV285,m2,"Panel l.v. PV Acustiver Papel e=60mm 1350x600","LANA DE VIDRIO",,,"4,2",,,"4,2",0
 P07TV290,m2,"Placa l.v. Calibel e=40 mm 2600x1200","LANA DE VIDRIO",,,"2,8",,,"2,8",0
-P07TV300,m2,"Manta vidrio IBR desnudo e=100mm 10000x1200","LANA DE VIDRIO",,,7,,,7,0
+P07TV300,m2,"Manta vidrio IBR desnudo e=100mm 10000x1200","LANA DE VIDRIO",,,3,,,3,0
 P07TV320,m2,"Manta f.v. IBR e=100mm 10000x1200","LANA DE VIDRIO",,,7,,,7,0
 P07TV340,m2,"Manta f.v. IBR e=80 mm 12000x1200","LANA DE VIDRIO",,,"5,6",,,"5,6",0
 P07TV350,m2,"Manta f.v. Fieltro T e=25mm 20000x1200","LANA DE VIDRIO",,,"1,75",,,"1,75",0
@@ -7338,7 +7338,7 @@ P08EXB090,m2,"Bald.barro 10x10x1,6 cm manual decorat.","BARRO COCIDO",,,20,,,20,
 P08EXC,,"BALDOSAS DE BALDOSÍN CATALÁN","BALDOSIN CATALAN",,,,,,0,0
 P08EXC010,m2,"Baldosín catalán 13x13 cm","BALDOSIN CATALAN",,,20,,,20,0
 P08EXC020,m2,"Baldosín catalán 14x28 cm","BALDOSIN CATALAN",,,20,,,20,0
-P08EXC030,m2,"Baldosín catalán 20x20 cm","BALDOSIN CATALAN",,,20,,,20,0
+P08EXC030,m2,"Baldosín catalán 20x20 cm","LADRILLO MACIZO LM",,,20,,,20,0
 P08EXC040,m2,"Baldosín catalán 13x13 cm c/taco","BALDOSIN CATALAN",,,20,,,20,0
 P08EXG,,"BALDOSAS DE GRES","BARRO COCIDO",,,,,,0,0
 P08EXG005,m2,"Baldosa gres extr. Castilla La Paloma 24x24x1,3","GRES RUSTICO",,,50,,,50,0
@@ -7394,7 +7394,7 @@ P08EXP041,m,"Tabica gres esmaltado13x25 cm","GRES ESMALTADO",,,,,,0,0
 P08EXP042,m,"Tabica gres esmalt.Rodamanto 31x15 cm","GRES ESMALTADO",,,,,,0,0
 P08EXP190,m,"Rodapié gres ext.Castilla La Paloma",GRES,,,,,,0,0
 P08EXP200,m,"Rodapie catalán 28x8 cm","BALDOSIN CATALAN",,,,,,0,0
-P08EXP202,m,"Rodapie catalán 20x8 cm","BALDOSIN CATALAN",,,"1,6",,,"1,6",0
+P08EXP202,m,"Rodapie catalán 20x8 cm","LADRILLO MACIZO LM",,,"1,6",,,"1,6",0
 P08EXP205,m,"Rodapie catalán 13x8 cm","BALDOSIN CATALAN",,,,,,0,0
 P08EXP207,m,"Rodapie barro 25x8 cm","BARRO COCIDO",,,,,,0,0
 P08EXP210,m,"Rodapié barro 27x8 cm","BARRO COCIDO",,,,,,0,0
@@ -9928,7 +9928,7 @@ P14KB030,m,"Biselado espejo",,,,,,,0,0
 P14KC,,CANTEADO,,,,,,,0,0
 P14KC010,m,"Canteado espejo",,,,,,,0,0
 P14KW,,VARIOS,,,,,,,0,0
-P14KW055,m,"Sellado con silicona incolora","SILICONA PURA",,,"0,06",,,"0,06",0
+P14KW055,m,"Sellado con silicona incolora","SILICONA PURA",,,"0,015",,,"0,015",0
 P14KW065,m,"Sellado con silicona neutra","SILICONA PURA",,,,,,0,0
 P14KW067,m,"Sellado con material compatible con Bioclean",,,,,,,0,0
 P14KW070,u,"Taladro espejo D<10 mm",,,,,,,0,0
@@ -11177,7 +11177,7 @@ P25MU070,l,"Barniz ecolog. universal al agua",,,,,,,0,0
 P25MU080,l,"Barniz ecolog. para madera al agua",,,,,,,0,0
 P25MV,,"BARNICES POLIURETANO 2 COMPONENTES",,,,,,,0,0
 P25MW,,"BARNIZ POLIURETANO MONOCOMPONENTE",,,,,,,0,0
-P25MW010,l,"Barniz poliuret. monocomp. parquet-madera",,,,,,,0,0
+P25MW010,l,"Barniz poliuret. monocomp. parquet-madera","POLIURETANO (PU)",,,"1,2",,,"1,2",0
 P25O,,"PREPARACIONES FONDOS E IMPRIMACIONES",,,,,,,0,0
 P25OF,,FONDOS,,,,,,,0,0
 P25OF005,kg,Aparejo,,,,1,,,1,0

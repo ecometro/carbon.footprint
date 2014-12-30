@@ -1193,7 +1193,7 @@ function hce_form() {
 	if ( !is_user_logged_in() || // if user is not logged in, then login form
 		is_user_logged_in() && array_key_exists('action', $_GET) && sanitize_text_field($_GET['action']) == 'edit' // if user profile edition
 	) {
-		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_get['redirect_to']); }
+		if ( array_key_exists('redirect_to', $_GET) ) { $redirect_url = sanitize_text_field($_GET['redirect_to']); }
 		else { $redirect_url = site_url( $_SERVER['REQUEST_URI'] ); }
 		$login_form = hce_login_form($redirect_url);
 		return $login_form;
@@ -1772,8 +1772,10 @@ function hce_db_emissions_table_populate() {
 			'%s',
 			'%s'
 		);
-
 		$line = 0;
+		// to convert coma to period in numbers
+		$pattern = '/(\d+),(\d+)/';
+		$replacement = '$1.$2';
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { // check version
 				$emissions_data_new_ver = $fp_csv[0];
@@ -1784,7 +1786,8 @@ function hce_db_emissions_table_populate() {
 			else {
 				// preparing data to insert
 				$opendap_code = $fp_csv[2];
-				$emission_factor = round($fp_csv[3],5);
+				$emission_factor = preg_replace($pattern,$replacement,$fp_csv[3]);
+				$emission_factor = round($emission_factor,5);
 				$data = array(
 					//'id' => is autoincrement
 					'opendap_code' => $opendap_code,
@@ -1842,7 +1845,9 @@ function hce_db_materials_table_populate() {
 			'%s'
 		);
 
-		$line = 0;
+		$line = 0;	
+		$pattern = '/(\d+),(\d+)/'; // to convert coma to period in numbers
+		$replacement = '$1.$2';
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { // check version
 				$materials_data_new_ver = $fp_csv[0];
@@ -1854,11 +1859,16 @@ function hce_db_materials_table_populate() {
 			else {
 				// preparing data to insert
 				$material_code = $fp_csv[0];
-				$material_mass = round($fp_csv[9],5);
-				$component1_mass = round($fp_csv[6],5);
-				$component2_mass = round($fp_csv[7],5);
-				$component3_mass = round($fp_csv[8],5);
-				$dap_factor = round($fp_csv[10],5);
+				$material_mass = preg_replace($pattern,$replacement,$fp_csv[9]);
+				$material_mass = round($material_mass,5);
+				$component1_mass = preg_replace($pattern,$replacement,$fp_csv[6]);
+				$component1_mass = round($component1_mass,5);
+				$component2_mass = preg_replace($pattern,$replacement,$fp_csv[7]);
+				$component2_mass = round($component2_mass,5);
+				$component3_mass = preg_replace($pattern,$replacement,$fp_csv[8]);
+				$component3_mass = round($component3_mass,5);
+				$dap_factor = preg_replace($pattern,$replacement,$fp_csv[10]);
+				$dap_factor = round($dap_factor,5);
 				$data = array(
 					//'id' => is autoincrement
 					'material_code' => $material_code,
