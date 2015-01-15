@@ -1830,24 +1830,12 @@ function hce_db_materials_table_populate() {
 	if ( $fp !== FALSE ) { // if the file exists and is readable
 	
 		$table = $wpdb->prefix . "hce_materials";
-		$format = array(
-			//'%d',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s',
-			'%s'
-		);
 
 		$line = 0;	
 		$pattern = '/(\d+),(\d+)/'; // to convert coma to period in numbers
 		$replacement = '$1.$2';
+		$inserts = array();
+		$inserts_placeholders = array();
 		while ( ($fp_csv = fgetcsv($fp,$line_length,$delimiter,$enclosure)) !== FALSE ) { // begin main loop
 			if ( $line == 0 ) { // check version
 				$materials_data_new_ver = $fp_csv[0];
@@ -1859,37 +1847,45 @@ function hce_db_materials_table_populate() {
 			else {
 				// preparing data to insert
 				$material_code = $fp_csv[0];
-				$material_mass = preg_replace($pattern,$replacement,$fp_csv[9]);
-				$material_mass = round($material_mass,5);
-				$component1_mass = preg_replace($pattern,$replacement,$fp_csv[6]);
-				$component1_mass = round($component1_mass,5);
-				$component2_mass = preg_replace($pattern,$replacement,$fp_csv[7]);
-				$component2_mass = round($component2_mass,5);
-				$component3_mass = preg_replace($pattern,$replacement,$fp_csv[8]);
-				$component3_mass = round($component3_mass,5);
-				$dap_factor = preg_replace($pattern,$replacement,$fp_csv[10]);
-				$dap_factor = round($dap_factor,5);
-				$data = array(
-					//'id' => is autoincrement
-					'material_code' => $material_code,
-					'material_name' => $fp_csv[2],
-					'material_unit' => $fp_csv[1],
-					'material_mass' => $material_mass,
-					'component_1' => $fp_csv[3],
-					'component_1_mass' => $component1_mass,
-					'component_2' => $fp_csv[4],
-					'component_2_mass' => $component2_mass,
-					'component_3' => $fp_csv[5],
-					'component_3_mass' => $component3_mass,
-					'dap_factor' => $dap_factor
-				);
-				/* create row */ $wpdb->insert( $table, $data, $format );
-
+				if ( $material_code != '' ) {
+					$material_mass = preg_replace($pattern,$replacement,$fp_csv[9]);
+					$material_mass = round($material_mass,5);
+					$component1_mass = preg_replace($pattern,$replacement,$fp_csv[6]);
+					$component1_mass = round($component1_mass,5);
+					$component2_mass = preg_replace($pattern,$replacement,$fp_csv[7]);
+					$component2_mass = round($component2_mass,5);
+					$component3_mass = preg_replace($pattern,$replacement,$fp_csv[8]);
+					$component3_mass = round($component3_mass,5);
+					$dap_factor = preg_replace($pattern,$replacement,$fp_csv[10]);
+					$dap_factor = round($dap_factor,5);
+					$material_name = $fp_csv[2];
+					$material_unit = $fp_csv[1];
+					$component1 = $fp_csv[3];
+					$component2 = $fp_csv[4];
+					$component3 = $fp_csv[5];
+	
+					array_push($inserts, '(%s,%s,%s,%f,%s,%f,%s,%f,%s,%f,%f)' );
+					array_push($inserts_placeholders,$material_code,$material_name,$material_unit,$material_mass,$component1,$component1_mass,$component2,$component2_mass,$component3,$component3_mass,$dap_factor);
+		
+				} // end if material code exists
 			} // end if not line 0
 			$line++;
-
 		} // end main loop
 		fclose($fp);
+
+		$inserts = implode(", ", $inserts);
+		$query_insert = "
+		INSERT INTO $table
+		  (material_code, material_name, material_unit, material_mass,
+		  component_1, component_1_mass,
+		  component_2, component_2_mass,
+		  component_3, component_3_mass,
+		  dap_factor)
+		VALUES
+		$inserts
+		";
+		$wpdb->query( $wpdb->prepare("$query_insert ", $inserts_placeholders) );
+
 		update_option( 'hce_materials_data_version', $materials_data_new_ver );
 
 	} else { // if data file do not exist
