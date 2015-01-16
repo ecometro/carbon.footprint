@@ -35,7 +35,7 @@ body { padding: 230px 0 120px; }
 	margin-right: 10px;
 }
 #epi-menu > li > a {
-	background-color: #ddd;
+	background-color: #ccc;
 }
 
 /* header navbars and menus */
@@ -76,6 +76,7 @@ body { padding: 230px 0 120px; }
 	border-radius: 3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
+	font-size: 0.8em;
 }
 .navbar-toggle {
 	padding: 6px 6px;
