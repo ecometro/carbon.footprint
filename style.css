@@ -22,7 +22,7 @@ Tags: HTML5, CSS3
 	text-align: center;
 }
 
-body { padding-top: 70px; }
+body { padding: 230px 0 100px; }
 #epi {
 }
 .epi-content {
@@ -33,13 +33,48 @@ body { padding-top: 70px; }
 	padding: 0 10px;
 }
 
-/* menus */
-.current-menu-item a,
-.logged-in #user-projects a {
-	background-color: #e7e7e7;
+/* header navbars and menus */
+#top-navbar {
+	z-index: 3030;
 }
-#navbar-third .dropdown {
-	height: 50px;
+#pre {
+	top: 30px;
+	height: 150px;
+	padding-top: 10px;
+	z-index: 2030;
+}
+#pre .navbar-header {
+	padding-bottom: 25px;
+}
+#pre-navbar {
+	top: 180px;
+	background-color: #fff;
+	border-color: transparent;
+	padding: 10px 0;
+}
+#pre-navbar a {
+	background-color: #eaeaea;
+	color: #7c7c7c;
+	font-weight: bold;
+}
+#pre-navbar a:hover {
+	color: #000;
+}
+#navbar-main {
+	text-transform: uppercase;
+}
+.navbar-toggle {
+	padding: 6px 6px;
+	margin-top: 0;
+}
+.current-menu-item a {
+	color: #bd0052 !important;
+}
+
+/* Buttons */
+.btn {
+	font-weight: 700;
+	text-transform: uppercase;
 }
 
 /* evaluation project form */

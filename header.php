@@ -42,28 +42,17 @@ wp_head(); ?>
 <?php // better to use body tag as the main container ?>
 <body <?php body_class(); ?>>
 
-<nav id="pre-navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
-	<div class="container-fluid">
+<nav id="top-navbar" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+	<div class="container">
 		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#hce-pre-navbar-collapse">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#top-navbar-collapse">
 				<span class="sr-only">Mostrar/Ocultar menú</span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
 		</div>
-		<div class="collapse navbar-collapse" id="hce-pre-navbar-collapse">
-			<?php $location = "header-menu";
-			if ( has_nav_menu( $location ) ) {
-				$args = array(
-					'theme_location'  => $location,
-					'container' => false,
-					'menu_id' => 'navbar-main',
-					'menu_class' => 'nav navbar-nav'
-				);
-				wp_nav_menu( $args );
-			} ?>
+		<div class="collapse navbar-collapse" id="top-navbar-collapse">
 			<ul id="navbar-third" class="nav navbar-nav navbar-right">
 				<?php if ( is_user_logged_in() ) {
 					$user_id = get_current_user_id();
@@ -87,9 +76,58 @@ wp_head(); ?>
 					$user_loginout_text = "Accede / regístrate "; ?>
 					<li><a href="<?php echo $user_loginout_url?>"><span class="glyphicon glyphicon-user"></span> <?php echo $user_loginout_text ?></a></li>
 				<?php } ?>
-				
 			</ul>
+			<?php $location = "top-menu";
+			if ( has_nav_menu( $location ) ) {
+				$args = array(
+					'theme_location'  => $location,
+					'container' => false,
+					'menu_id' => 'navbar-second',
+					'menu_class' => 'nav navbar-nav navbar-right'
+				);
+				wp_nav_menu( $args );
+			} ?>
 		</div>
 	</div>
 </nav>
+
+<div id="pre" class="navbar navbar-default navbar-fixed-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#pre-collapse">
+				<span class="sr-only">Mostrar/Ocultar menú</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
+		</div>
+		<div class="collapse navbar-collapse" id="pre-collapse">Aqui las fotos y las citas de los arquitectos sabios.</div>
+	</div>
+</div>
+<nav id="pre-navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#pre-navbar-collapse">
+				<span class="sr-only">Mostrar/Ocultar menú</span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+		</div>
+		<div class="collapse navbar-collapse" id="pre-navbar-collapse">
+			<?php $location = "header-menu";
+			if ( has_nav_menu( $location ) ) {
+				$args = array(
+					'theme_location'  => $location,
+					'container' => false,
+					'menu_id' => 'navbar-main',
+					'menu_class' => 'nav nav-pills'
+				);
+				wp_nav_menu( $args );
+			} ?>
+		</div>
+	</div>
+</nav>
+
 <div class="container">
