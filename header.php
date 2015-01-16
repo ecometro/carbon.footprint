@@ -122,7 +122,7 @@ wp_head(); ?>
 					'theme_location'  => $location,
 					'container' => false,
 					'menu_id' => 'navbar-main',
-					'menu_class' => 'nav nav-pills'
+					'menu_class' => 'nav navbar-nav'
 				);
 				wp_nav_menu( $args );
 			} ?>

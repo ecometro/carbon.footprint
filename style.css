@@ -22,15 +22,20 @@ Tags: HTML5, CSS3
 	text-align: center;
 }
 
-body { padding: 230px 0 100px; }
+body { padding: 230px 0 120px; }
 #epi {
 }
 .epi-content {
 	padding-top: 9px;
-	border-top: 1px solid #EEE;
 }
-.epi-content .list-inline li {
+.epi-content li {
 	padding: 0 10px;
+}
+#epi-menu > li {
+	margin-right: 10px;
+}
+#epi-menu > li > a {
+	background-color: #ddd;
 }
 
 /* header navbars and menus */
@@ -62,6 +67,15 @@ body { padding: 230px 0 100px; }
 }
 #navbar-main {
 	text-transform: uppercase;
+}
+#navbar-main > li {
+	margin-right: 10px;
+}
+#navbar-main > li > a {
+	padding: 5px 10px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
 }
 .navbar-toggle {
 	padding: 6px 6px;
