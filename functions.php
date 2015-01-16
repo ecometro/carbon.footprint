@@ -170,6 +170,9 @@ function hce_register_form() {
 		} elseif ( $pass != '' && $pass != $pass2 ) {
 			$feedback_type = "danger"; $feedback_text = "<strong>La contraseña no coincide</strong>. Inténtalo otra vez.";
 
+		} elseif ( !array_key_exists('user_accept',$_POST) || sanitize_text_field($_POST['user_accept']) != 'Acepto' ) {
+			$feedback_type = "danger"; $feedback_text = "<strong>Tienes que aceptar las condiciones legales</strong>. Y quizás leerlas antes de aceptarlas.";
+
 		} else { $feedback_type = ""; }
 
 		if ( $feedback_type != "" ) { $feedback_out = "<div class='alert alert-".$feedback_type."' role='alert'>".$feedback_text."</div>"; }
@@ -232,7 +235,39 @@ function hce_register_form() {
 			</div>
 		</fieldset>
 		<fieldset class='form-group'>
+			<label for='user_legal' class='col-sm-3 control-label'>Condiciones legales</label>
+			<div class='col-sm-5'>
+			<textarea id='user_legal' name='user_legal' class='form-control' rows='10' disabled>
+CLAÚSULA INFORMATIVA DE REGISTRO DE NUEVO USUARIO:
+
+De acuerdo con lo dispuesto en el artículo 5 de la Ley Orgánica 15/1999, de 13 de diciembre, de protección de datos de carácter personal (LOPD) el solicitante queda informado de:
+
+1.- Sus datos personales se incorporarán a los ficheros de datos personales cuya titularidad ostenta ECÓMETRO. ASOCIACIÓN PARA LA MEDICIÓN Y DIFUSIÓN DE LA ECOLOGÍA EN LA ARQUITECTURA, con domicilio social en la calle Villanueva 35 de Madrid.
+
+2.- Las finalidades de los tratamientos de los datos personales serán:
+
+    El examen de su solicitud como asociado y estimar su ingreso en la Asociación.
+    Gestión de las actividades de la Asociación y de sus órganos de representación.
+    Gestión de las relaciones jurídico-económicas entre la Asociación y sus asociados.
+    Gestión y organización de las actividades de todo tipo que se desarrollen para el cumplimiento de los fines de la Asociación.
+    La ejecución de los Estatutos de la Asociación, que el solicitante declara conocer y aceptar.
+
+3.- Las cesiones de datos que se efectuarán serán las siguientes:
+
+    A la entidad bancaria en la que la Asociación disponga de la cuenta corriente para la domiciliación del pago de la cuota de asociado.
+    Las que resulten de la ejecución de los Estatutos de la Asociación que el solicitante declara conocer y aceptar.
+    Las que se realicen bajo los supuestos previstos en el artículo 11 de la LOPD.
+
+4.- Ejercicio de derechos de acceso, rectificación, cancelación y oposición: los interesados podrán ejercitar estos derechos en los términos recogidos en la LOPD y normativa de desarrollo, dirigiéndose a la Secretaría de la Asociación en su domicilio (calle Veneras 9 / 28013 Madrid).
+</textarea>
+			</div>
+		</fieldset>
+		<fieldset class='form-group'>
 			<div class='col-sm-offset-3 col-sm-5'>
+				<label for='user_accept'>
+					<input name='user_accept' id='user_accept' type='checkbox' value='Acepto' />
+					Acepto las condiciones legales.
+				</label>
 				<div class='pull-right'>
 					<input id='wp-submit' class='btn btn-success' type='submit' value='Regístrate' name='wp-submit' />
 				</div>
