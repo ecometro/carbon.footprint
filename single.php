@@ -108,9 +108,11 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	}
 	$emission_per_section_out = "
 	<div class='dossier-table-header row'>
-		<div class='col-sm-12'><div><strong>EMISIONES POR CAPÍTULO</strong></div>
+		<div class='col-sm-12'>
+			<div><strong>EMISIONES POR CAPÍTULO</strong></div>
 			<small>en kg CO2 eq</small>
-			<span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-primary btn-xs' disabled='disabled'>Embebidas</span></div>
+			<span class='btn btn-info btn-xs' disabled='disabled'>Transporte</span> <span class='btn btn-warning btn-xs' disabled='disabled'>Embebidas</span>
+		</div>
 	</div>
 	";
 	$e_max = $e_max + $e_max * 0.05;
@@ -119,9 +121,9 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$intrinsic = round( $e['emission'], 1 );
 		$transport = round( $e['emission_transport'], 1 );
 		$total = $intrinsic+$transport;
-		if ( $intrinsic <= $e_min && $intrinsic != 0 ) { $intrinsic_relative = 5; }
+		if ( $intrinsic <= $e_min && $intrinsic != 0 ) { $intrinsic_relative = 0.5; }
 		else { $intrinsic_relative = round( $intrinsic * 100 / $e_max ); }
-		if ( $transport <= $e_min && $transport != 0 ) { $transport_relative = 10; }
+		if ( $transport <= $e_min && $transport != 0 ) { $transport_relative = 0.5; }
 		else { $transport_relative = round( $transport * 100 / $e_max ); }
 		$emission_per_section_out .= "
 		<div class='row emission-cap'>
@@ -130,7 +132,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 					<div class='progress-bar progress-bar-info' style='width: ".$transport_relative."%;'>
 					".$transport."
 					</div>
-					<div class='progress-bar' style='width: ".$intrinsic_relative."%;'>
+					<div class='progress-bar progress-bar-warning' style='width: ".$intrinsic_relative."%;'>
 					".$intrinsic."
 					</div>
 				</div>
@@ -141,6 +143,10 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	}
 
 	// emissions circles
+	$e_media_user = "15000";
+	$e_media_m2 = "5200";
+	$e_media_e = "200";
+	$e_media_kg = "1.1";
 	$cfield_prefix = '_hce_project_';
 	$emissions_total = round( get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true) );
 	$users = get_post_meta($project_id,$cfield_prefix."users",TRUE);
@@ -152,54 +158,44 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	$e_per_e = round($emissions_total/$budget,2);
 	$e_per_kg = round($emissions_total/$weight,2);
 	$circles = array(
-		"'".$e_per_user."'" => array("users","kg CO<sub>2</sub> eq emitidos por usuario. <strong><nobr>Usuarios: ".$users."</nobr></strong>"),
-		"'".$e_per_m2."'" => array("built-area","kg CO<sub>2</sub> eq emitidos por m2 de superficie construida. <strong><nobr>Superficies construida: ".$built_area." m<sub>2</sub></nobr></strong>"),
-		"'".$e_per_e."'" => array("budget","kg CO<sub>2</sub> eq emitidos por cada euro gastado. <strong><nobr>Presupuesto: ".$budget." €</nobr></strong>"),
-		"'".$e_per_kg."'" => array("weight","kg CO<sub>2</sub> eq emitidos por cada kilogramo de edificio. <strong><nobr>Peso: ".$weight." kg</nobr></strong>"),
+		array($e_per_user,$e_media_user,"usuario","Usuarios: ".$users),
+		array($e_per_m2,$e_media_m2,"m2 construido","Superficies construida: ".$built_area." m<sub>2</sub>"),
+		array($e_per_e,$e_media_e,"euro gastado","Presupuesto: ".$budget." €"),
+		array($e_per_kg,$e_media_kg,"kg de edificio","Peso: ".$weight." kg")
 	);
-	if ( $view == 'dossier' ) { // if dossier view and printed version
-		$circles_out = "<ul class='list-unstyled'>";
-		foreach ( $circles as $e => $texts ) {
-			$circles_out .= "<li><strong>".$e."</strong> ".$texts[1]."</li>";
-		}
-		$circles_out .= "</ul>";
 
-	} else {
-//echo "<pre>";print_r($circles);echo "</pre>";
-//		krsort($circles);
-//echo "<pre>";print_r($circles);echo "</pre>";
-		$circles_out = array();
-		$c_count = 0;
-		foreach ( $circles as $e => $texts ) {
-			$e = preg_replace("/'/","",$e); // to recover float value, without '
-//echo $e."<br>";
-			$c_count++;
-			$r = sqrt( $e/M_PI );
-			if ( $c_count == 1 ) { $c_max = $r; }
-			$c_relative = round( $r * 100 / $c_max );
-			if ( $c_relative <= 1 ) { $c_relative = 1; }
-			$c_margin = ( 100 - $c_relative ) / 2;
-			if ( $c_relative == 100 ) { $c_styles = "";  $c_label_styles = " style='font-size: 3em;'"; }
-			elseif ( $c_relative <= 25 ) { $c_styles = " text-indent: 110%; margin-top: ".$c_margin."%;"; $c_label_styles = " style='color: #000;'"; }
-			else { $c_styles = " margin-top: ".$c_margin."%;"; $c_label_styles = " style='font-size: 1.5em;'"; }
-			$circles_out[$texts[0]] = "
-				<div class='dossier-circle' style='width: ".$c_relative."%;".$c_styles."'>
-					<div class='dossier-circle-label bg-primary'$c_label_styles>".$e."</div>
+	$circles_out = "<div class='row'>";
+	$c_count = 0;
+	foreach ( $circles as $c ) {
+		$r_project = sqrt( $c[0]/M_PI );
+		$r_media = sqrt( $c[1]/M_PI );
+		$c_project = 50;
+		$c_media = $r_media * 50 / $r_project;
+		$c_media_zindex = 3;
+		$c_project_zindex = 2;
+		if ( $c_media > 100 ) {
+			$c_media = 100;
+			$c_project = $r_project * 100 / $r_media;
+		}
+		if ( $c_media >= $c_project ) { $c_project_zindex = 4; }
+		$c_project_margin = ( 100 - $c_project ) / 2;
+		$c_media_margin = ( 100 - $c_media ) / 2;
+		$circles_out .= "
+		<div class='col-sm-3'>
+			<div class='dossier-circle-text'><strong><small>Por ".$c[2]."</small></strong></div>
+			<div class='dossier-circles'>
+				<div class='dossier-circle dossier-circle-media' style='width: ".$c_media."%; margin-top: ".$c_media_margin."%; z-index: ".$c_media_zindex.";'>
+					<div class='dossier-circle-label bg-default'>".$c[1]."</div>
 				</div>
-			";
-			$circles_footer_out[$texts[0]] = "<div class='dossier-circle-text'><small>".$texts[1]."</small></div>";
-		}
-		$circles_row1 = "<div class='row'>";
-		$circles_row2 = "<div class='row'>";
-		foreach ( array('users','weight','budget','built-area') as $circle ) {
-			$circles_row1 .= "<div class='col-sm-3'>".$circles_out[$circle]."</div>";
-			$circles_row2 .= "<div class='col-sm-3'>".$circles_footer_out[$circle]."</div>";
-		}
-		$circles_row1 .= "</div>";
-		$circles_row2 .= "</div>";
-		$circles_out = $circles_row1.$circles_row2;
-
-	} // end if dossier or results view
+				<div class='dossier-circle dossier-circle-project' style='width: ".$c_project."%; margin-top: ".$c_project_margin."%; z-index: ".$c_project_zindex.";'>
+					<div class='dossier-circle-label bg-primary'>".$c[0]."</div>
+				</div>
+			</div>
+			<div class='dossier-circle-text'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span> <span class='btn btn-default btn-xs' disabled='disabled'>".$c[1]."</span></div>
+		</div>
+		";
+	}
+	$circles_out .= "</div>";
 ?>
 
 <header id="dossier-tit" role="banner">
@@ -223,8 +219,20 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 
 		<section class="dossier-section" id="dossier-emission">
 		<?php if ( $view != 'dossier' ) { ?>
-			<header class="row"><h2 class="col-sm-12">Emisiones <small>Total: <strong class="bg-info"><?php echo $emissions_total; ?></strong> kg de CO<sub>2</sub> equivalente</small></h2></header>
-			<div class="row">
+			<header class="row"><h2 class="col-sm-12">Emisiones</h2></header>
+			<div class='row'>
+				<div class='col-sm-12'>
+					<div><strong>TOTAL</strong></div>	
+					<span class='btn btn-primary btn' disabled='disabled'><?php echo $emissions_total; ?></span> <small>kg CO<sub>2</sub> eq</small>
+				</div>
+			</div>
+			<div class='dossier-table-header row'>
+				<div class='col-sm-12'>
+					<div><strong>RELATIVAS</strong></div>	
+					<small>en kg CO<sub>2</sub> eq</small> <span class='btn btn-primary btn-xs' disabled='disabled'>Proyecto actual</span> <span class='btn btn-default btn-xs' disabled='disabled'>Media todos los proyectos</span>
+				</div>
+			</div>
+			<div class='row'>
 				<div class="col-sm-12"><?php echo $circles_out; ?></div>
 			</div>
 

@@ -125,7 +125,17 @@ body { padding: 230px 0 120px; }
 .dossier-section h2 {
 	margin-top: 0;
 }
-.dossier-circle,
+.dossier-circles {
+	position: relative;
+	height: 160px;
+	text-indent: -9999px;
+}
+.dossier-circle {
+	position: absolute;
+}
+.dossier-circle .bg-default {
+	background-color: #eaeaea;
+}
 .list-circle {
 	position: relative;
 	margin: 0 auto;
@@ -150,18 +160,15 @@ body { padding: 230px 0 120px; }
 	padding: 20% 0 0 0;
 	text-align: center;
 }
-.dossier-circle-label {
-	font-weight: bold;
-}
 .dossier-circle-text {
-	text-align: center;
+	padding-top: 1em;
 }
 #dossier-emission .progress {
 	margin-bottom: 0;
 	text-indent: -9999px;
 }
 .emission-cap {
-	margin-bottom: 20px;
+	margin-bottom: 30px;
 }
 
 /* archive and author lists */
