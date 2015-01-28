@@ -143,10 +143,45 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 	}
 
 	// emissions circles
-	$e_media_user = "15000";
-	$e_media_m2 = "5200";
-	$e_media_e = "200";
-	$e_media_kg = "1.1";
+	$table_pm = $wpdb->prefix . "postmeta";
+	$sql_rel_e = "
+	SELECT
+	  meta_key,
+	  meta_value
+	FROM $table_pm
+	WHERE meta_key IN (
+	  '_hce_project_emission_relative_user',
+	  '_hce_project_emission_relative_m2',
+	  '_hce_project_emission_relative_e',
+	  '_hce_project_emission_relative_kg' )
+	";
+	$rel_e_results = $wpdb->get_results( $sql_rel_e , ARRAY_A );
+	$projects_count = count($rel_e_results) / 4;
+	$e_media_user = "";
+	$e_media_m2 = "";
+	$e_media_e = "";
+	$e_media_kg = "";
+	foreach ( $rel_e_results as $rel_e ) {
+		switch ($rel_e['meta_key']) {
+			case '_hce_project_emission_relative_user':
+			$e_media_user += $rel_e['meta_value'];
+			break;
+			case '_hce_project_emission_relative_m2':
+			$e_media_m2 += $rel_e['meta_value'];
+			break;
+			case '_hce_project_emission_relative_e':
+			$e_media_e += $rel_e['meta_value'];
+			break;
+			case '_hce_project_emission_relative_kg':
+			$e_media_kg += $rel_e['meta_value'];
+			break;
+		}
+	}
+	$e_media_user = round( $e_media_user / $projects_count, 1 );
+	$e_media_m2 = round( $e_media_m2 / $projects_count, 1 );
+	$e_media_e = round( $e_media_e / $projects_count, 1 );
+	$e_media_kg = round( $e_media_kg / $projects_count, 1 );
+
 	$cfield_prefix = '_hce_project_';
 	$emissions_total = round( get_post_meta($post->ID,'_hce_project_emission_total',true) + get_post_meta($post->ID,'_hce_project_emission_transport_total',true) );
 	$users = get_post_meta($project_id,$cfield_prefix."users",TRUE);
@@ -229,7 +264,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 			<div class='dossier-table-header row'>
 				<div class='col-sm-12'>
 					<div><strong>RELATIVAS</strong></div>	
-					<small>en kg CO<sub>2</sub> eq</small> <span class='btn btn-primary btn-xs' disabled='disabled'>Proyecto actual</span> <span class='btn btn-default btn-xs' disabled='disabled'>Media todos los proyectos</span>
+					<small>en kg CO<sub>2</sub> eq</small> <span class='btn btn-primary btn-xs' disabled='disabled'>Proyecto actual</span> <span class='btn btn-default btn-xs' disabled='disabled'>Media <?php echo $projects_count ?> proyectos evaluados</span>
 				</div>
 			</div>
 			<div class='row'>
