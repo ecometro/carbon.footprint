@@ -70,6 +70,9 @@ function hce_theme_setup() {
 	// redirect to right log in page when blank username or password
 	add_action( 'authenticate', 'hce_blank_login');
 
+	// save emission custom fields
+	add_action('save_post','hce_project_relative_emission');
+
 } // end hce theme setup function
 
 // USER functions
@@ -1000,8 +1003,28 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 	";
 	$wpdb->query( $wpdb->prepare($query_update, $update_ids) );
 
-	// save total emissions of building
+	// save total emissions of building: intrinsic or transport
 	update_post_meta($project_id, $cfield_prefix.$building_total_emission['key'], $building_total_emission['value']);
+
+} // end calculate CO2 emission for each material in the project table
+
+// save project relative emissions in postmeta table
+function hce_project_relative_emission($project_id) {
+
+	global $post;
+	if ( wp_is_post_revision( $post_id ) || 'project' != $post->post_type )
+		return;
+
+	$cfield_prefix = '_hce_project_';
+	$tot = get_post_meta($project_id,$cfield_prefix."emission_total",TRUE) + get_post_meta($project_id,$cfield_prefix."emission_transport_total",TRUE);
+	$rel_user = round($tot / get_post_meta($project_id,$cfield_prefix."users",TRUE),2);
+	$rel_m2 = round($tot / get_post_meta($project_id,$cfield_prefix."built-area",TRUE),2);
+	$rel_e = round($tot / get_post_meta($project_id,$cfield_prefix."budget",TRUE),2);
+	$rel_kg = round($tot / get_post_meta($project_id,$cfield_prefix."mass_total",TRUE),2);
+	update_post_meta($project_id, $cfield_prefix."emission_relative_user", $rel_user);
+	update_post_meta($project_id, $cfield_prefix."emission_relative_m2", $rel_m2);
+	update_post_meta($project_id, $cfield_prefix."emission_relative_e", $rel_e);
+	update_post_meta($project_id, $cfield_prefix."emission_relative_kg", $rel_kg);
 
 } // end calculate CO2 emission for each material in the project table
 
@@ -1033,7 +1056,7 @@ function hce_project_upload_file() {
 			if ( false === wp_delete_attachment( get_post_meta($project_id,$cfield_prefix.'csv_file',true), true ) ) {
 				$location .= "?step=2&project_id=".$project_id."&feedback=file_not_deleted";
 			} else {
-				$cfields_to_delete = array('csv_file','mass_topten','mass_total','emission_total','emission_transport_total');
+				$cfields_to_delete = array('csv_file','mass_topten','mass_total','emission_total','emission_transport_total','emission_relative_user','emission_relative_m2','emission_relative_e','emission_relative_kg');
 				foreach ( $cfields_to_delete as $cfield_name ) { delete_post_meta($project_id,$cfield_prefix.$cfield_name); }
 				foreach ( array('transport_distance','transport_type') as $cfield_name) {
 					for ( $c = 1; $c <= 10; $c++ ) {
@@ -1202,6 +1225,11 @@ function hce_project_emission_transport() {
 
 		// calculate transport CO2 emissions for each material in the top ten
 		hce_project_calculate_emissions($project_id,'transport');
+
+		// save relative emissions to make stats
+		hce_project_relative_emission($project_id);
+
+		// change project status
 		if ( $project->post_status == 'draft' ) {
 			$args = array(
 				'ID' => $project_id,
@@ -1210,7 +1238,7 @@ function hce_project_emission_transport() {
 			// update project
 			$updated_id = wp_update_post($args);
 		}
-		$location .= "?step=4&project_id=".$project_id."feedback=eval_complete";
+		$location .= "?step=4&project_id=".$project_id."&feedback=eval_complete";
 		wp_redirect($location);
 		exit;
 
@@ -1302,7 +1330,7 @@ function hce_form() {
 	} else { $action_prev = ""; $prev_step_out = ""; }
 
 	// FORM FEEDBACK: error and success
-	if ( $form_feedback != '' ) {
+	if ( $form_feedback != '' && $form_feedback != 'eval_complete' ) {
 		if ( $form_feedback == 'required_field' ) { $feedback_type = "danger"; $feedback_text = "Alguno de los campos requeridos para enviar el formulario están vacíos. Por favor, revisalos y vuelve a intentarlo."; }
 		elseif ( $form_feedback == 'fileformat' ) { $feedback_type = "danger"; $feedback_text = "El archivo debe ser CSV. Parece que el que has intentado subir no lo es. Puedes intentarlo de nuevo en el formulario de abajo."; }
 		elseif ( $form_feedback == 'filesize' ) { $feedback_type = "danger"; $feedback_text = "El archivo debe ser menor de 40kB. Parece que el que has intentado subir pesa más. Puedes intentarlo de nuevo en el formulario de abajo."; }
