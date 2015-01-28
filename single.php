@@ -181,8 +181,8 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		$c_project_margin = ( 100 - $c_project ) / 2;
 		$c_media_margin = ( 100 - $c_media ) / 2;
 		$circles_out .= "
-		<div class='col-sm-3'>
-			<div class='dossier-circle-text'><strong><small>Por ".$c[2]."</small></strong></div>
+		<div class='col-sm-3 col-xs-6'>
+			<div class='dossier-circle-pre'><strong><small>Por ".$c[2]."</small></strong></div>
 			<div class='dossier-circles'>
 				<div class='dossier-circle dossier-circle-media' style='width: ".$c_media."%; margin-top: ".$c_media_margin."%; z-index: ".$c_media_zindex.";'>
 					<div class='dossier-circle-label bg-default'>".$c[1]."</div>
@@ -191,7 +191,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 					<div class='dossier-circle-label bg-primary'>".$c[0]."</div>
 				</div>
 			</div>
-			<div class='dossier-circle-text'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span> <span class='btn btn-default btn-xs' disabled='disabled'>".$c[1]."</span></div>
+			<div class='dossier-circle-epi'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span> <span class='btn btn-default btn-xs' disabled='disabled'>".$c[1]."</span></div>
 		</div>
 		";
 	}

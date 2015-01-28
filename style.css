@@ -127,8 +127,8 @@ body { padding: 230px 0 120px; }
 }
 .dossier-circles {
 	position: relative;
-	height: 160px;
 	text-indent: -9999px;
+	height: 350px;
 }
 .dossier-circle {
 	position: absolute;
@@ -160,9 +160,6 @@ body { padding: 230px 0 120px; }
 	padding: 20% 0 0 0;
 	text-align: center;
 }
-.dossier-circle-text {
-	padding-top: 1em;
-}
 #dossier-emission .progress {
 	margin-bottom: 0;
 	text-indent: -9999px;
@@ -177,6 +174,24 @@ body { padding: 230px 0 120px; }
 }
 .list-heading {
 	margin-top: 0;
+}
+
+/* Smallest devices (mobiles, px and up) */
+@media (max-width: 767px) {
+	.dossier-circle-epi { margin-bottom: 3em; }
+	.dossier-circle-pre { border-top: 1px solid #ddd; }
+}
+/* Small devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+	.dossier-circles { height: 130px; }
+}
+/* Medium devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+	.dossier-circles { height: 170px; }
+}
+/* Large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+	.dossier-circles { height: 200px; }
 }
 
 /* dossier print styles */
