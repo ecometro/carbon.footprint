@@ -91,20 +91,45 @@ wp_head(); ?>
 	</div>
 </nav>
 
-<div id="pre" class="navbar navbar-default navbar-fixed-top">
-	<div class="container">
-		<div class="navbar-header">
-			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#pre-collapse">
-				<span class="sr-only">Mostrar/Ocultar menú</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
+<div id="pre" class="container-fluid">
+	<div class="row">
+		<div id="logo" class="col-sm-3">
+			<a class="pull-right" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
 		</div>
-		<div class="collapse navbar-collapse" id="pre-collapse">Aqui las fotos y las citas de los arquitectos sabios.</div>
+		<div class="col-sm-9">
+			<div id="interviews-carousel" class="carousel slide" data-ride="carousel">
+
+<?php
+$interviews = array(
+	array('María Jesús González','Dra.  Arquitecta,  presidenta  de   AxS  (Agrupación  de  Arquitectos  por  la  Sostenibilidad)','m.jesus'),
+	array('Javier Serra María-Tomé','Arquitecto  por  la  Universidad  Politécnica de  Madrid  y  funcionario  de  carrera  del  Cuerpo  de Arquitectos del Estado','serra'),
+	array('Cecilia Alcalá','Bióloga y PDD en el IESE','cecilia'),
+	array('Jesús Abadía','Licenciado  en  Ciencias  Químicas,  Diplomado  en  Ingeniería  Ambiental  en  la  EOI  y  MBA  en  el  IE','abadia'),
+	array('Javier Serra María-Tomé','Arquitecto  por  la  Universidad  Politécnica de  Madrid  y  funcionario  de  carrera  del  Cuerpo  de Arquitectos del Estado','serra.b')
+);
+$indicators_out = "<ol class='carousel-indicators'>";
+$slides_out = "<div class='carousel-inner' role='listbox'>";
+foreach ( $interviews as $count => $i ) {
+	if ( $count == 0 ) { $indicators_out .= "<li data-target='#interviews-carousel' data-slide-to='".$count."' class='active'></li>"; $active = " active"; }
+	else { $indicators_out .= "<li data-target='#interviews-carousel' data-slide-to='".$count."'></li>"; $active = ""; }
+	$count++;
+	$slides_out .= "
+	<div class='item".$active."'>
+		<img src='".HCE_BLOGTHEME."/images/carousel.0".$count.".jpg' alt='".$i[0]."' />
+		<div class='carousel-caption'>
+		<strong>".$i[0]."</strong><br />".$i[1]."<br /><a href='".HCE_BLOGTHEME."/images/carousel.pdf.0".$count.".pdf'>Descargar entrevista PDF</a>
+		</div>
 	</div>
-</div>
+	";
+}
+$indicators_out .= "</ol>";
+$slides_out .= "</div>";
+			echo $indicators_out.$slides_out;
+?>
+			</div>
+		</div>
+	</div><!-- .row -->
+</div><!-- .container-fluid -->
 <nav id="pre-navbar" class="navbar navbar-default navbar-fixed-top" role="navigation">
 	<div class="container">
 		<div class="navbar-header">

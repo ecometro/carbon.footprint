@@ -43,16 +43,23 @@ body { padding: 230px 0 120px; }
 	z-index: 3030;
 }
 #pre {
+	position: fixed;
 	top: 30px;
-	height: 150px;
-	padding-top: 10px;
+	left: 0;
+	right: 0;
+	height: 144px;
 	z-index: 2030;
+	background-color: #eaeaea;
 }
-#pre .navbar-header {
-	padding-bottom: 25px;
+#logo {
+	padding-top: 10px;
+}
+#pre .carousel-caption {
+	left: 25%;;
+	right: 25%;;
 }
 #pre-navbar {
-	top: 180px;
+	top: 170px;
 	background-color: #fff;
 	border-color: transparent;
 	padding: 10px 0;
