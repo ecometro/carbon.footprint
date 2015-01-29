@@ -399,7 +399,8 @@
     "component-animations.less",
     "dropdowns.less",
     "tooltip.less",
-    "modals.less"
+    "modals.less",
+    "carousel.less"
   ],
   "js": [
     "alert.js",
@@ -414,5 +415,5 @@
     "scrollspy.js",
     "transition.js"
   ],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=4a09644d47d3a6ebf9ca"
+  "customizerUrl": "http://getbootstrap.com/customize/?id=204f29f75103ba539a12"
 }
