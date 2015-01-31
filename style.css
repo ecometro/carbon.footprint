@@ -48,11 +48,13 @@ body { padding: 210px 0 85px; }
 	padding-top: 10px;
 }
 #pre .carousel-indicators {
-	bottom: 0;
+	bottom: -5px;
+	text-align: left;
 }
 #pre .carousel-caption {
-	left: 25%;
-	right: 25%;
+	right: auto;
+	max-width: 720px;
+	text-align: left;
 	padding-bottom: 10px;
 	font-size: 0.9em;
 }
