@@ -91,21 +91,21 @@ wp_head(); ?>
 	</div>
 </nav>
 
-<div id="pre" class="container-fluid">
+<div id="pre" class="container">
 	<div class="row">
 		<div id="logo" class="col-sm-3">
-			<a class="pull-right" href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
+			<a href="<?php echo HCE_BLOGURL; ?>" title="<?php echo HCE_BLOGNAME; ?>"><img class="img-responsive" src="<?php echo HCE_BLOGTHEME; ?>/images/logo.arco2.png" alt="<?php echo HCE_BLOGNAME; ?>" /></a>
 		</div>
 		<div class="col-sm-9">
 			<div id="interviews-carousel" class="carousel slide" data-ride="carousel">
 
 <?php
 $interviews = array(
-	array('María Jesús González','Dra.  Arquitecta,  presidenta  de   AxS  (Agrupación  de  Arquitectos  por  la  Sostenibilidad)','m.jesus'),
-	array('Javier Serra María-Tomé','Arquitecto  por  la  Universidad  Politécnica de  Madrid  y  funcionario  de  carrera  del  Cuerpo  de Arquitectos del Estado','serra'),
+	array('María Jesús González','Dra. Arquitecta, presidenta de Agrupación de Arquitectos por la Sostenibilidad','m.jesus'),
+	array('Javier Serra María-Tomé','Arquitecto por la UPM y funcionario de carrera del Cuerpo de Arquitectos del Estado','serra'),
 	array('Cecilia Alcalá','Bióloga y PDD en el IESE','cecilia'),
-	array('Jesús Abadía','Licenciado  en  Ciencias  Químicas,  Diplomado  en  Ingeniería  Ambiental  en  la  EOI  y  MBA  en  el  IE','abadia'),
-	array('Javier Serra María-Tomé','Arquitecto  por  la  Universidad  Politécnica de  Madrid  y  funcionario  de  carrera  del  Cuerpo  de Arquitectos del Estado','serra.b')
+	array('Jesús Abadía','Licenciado en Ciencias Químicas, diplomado en Ingeniería Ambiental en la EOI, MBA en el IE','abadia'),
+	array('Javier Serra María-Tomé','Arquitecto por la UPM y funcionario de carrera del Cuerpo de Arquitectos del Estado','serra.b')
 );
 $indicators_out = "<ol class='carousel-indicators'>";
 $slides_out = "<div class='carousel-inner' role='listbox'>";
@@ -155,4 +155,4 @@ $slides_out .= "</div>";
 	</div>
 </nav>
 
-<div class="container">
+<div id="content" class="container">
