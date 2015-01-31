@@ -8,7 +8,7 @@
 			        <span class="icon-bar"></span>
 		</button>
 		<div class="collapse navbar-collapse" id="footer-navbar-collapse">
-				<ul class="epi-content list-inline">
+				<ul class="epi-content list-inline pull-left">
 					<li class="text-muted"><strong><small>Una iniciativa de</small></strong><br /><a href="http://www.sostenibilidadyarquitectura.com/"><img src="<?php echo HCE_BLOGTHEME."/images/logo.asa.png" ?>" alt="Logo de la Asociación Sostenibilidad y Arquitectura" /></a></li>
 					<li class="text-muted"><strong><small>Con el apoyo de</small></strong><br /><a href="http://fundacion-biodiversidad.es/"><img src="<?php echo HCE_BLOGTHEME."/images/logo.f.biodiversidad.png" ?>" alt="Logo de la Fundación Biodiversidad" /></a></li>
 				</ul>
@@ -18,12 +18,12 @@
 			'theme_location'  => $location,
 			'container' => false,
 			'menu_id' => 'epi-menu',
-			'menu_class' => 'nav navbar-nav'
+			'menu_class' => 'nav navbar-nav pull-right'
 		);
 		wp_nav_menu( $args );
 	} ?>
 </div>
-</div>
+	</div>
 </footer>
 <?php
 // get number of queries

@@ -22,21 +22,12 @@ Tags: HTML5, CSS3
 	text-align: center;
 }
 
-body { padding: 210px 0 120px; }
-#epi {
+body { padding: 210px 0 85px; }
+#content {
+	background-color: #fff;
+	padding-bottom: 45px;
 }
-.epi-content {
-	padding-top: 9px;
-}
-.epi-content li {
-	padding: 0 10px;
-}
-#epi-menu > li {
-	margin-right: 10px;
-}
-#epi-menu > li > a {
-	background-color: #ccc;
-}
+
 
 /* header */
 #top-navbar {
@@ -104,13 +95,22 @@ body { padding: 210px 0 120px; }
 }
 
 /* footer */
-#epi .container {
-	background-color: #eaeaea;
+.epi-content, #epi-menu {
+	padding-top: 9px;
 }
-
-/* main content area */
-#content {
-	background-color: #fff;
+.epi-content li {
+	padding: 0 10px;
+}
+#epi-menu li {
+	margin-left: 5px;
+}
+#epi-menu > li > a {
+	background-color: #ccc;
+	padding: 2px 3px;
+}
+#epi .container {
+	font-size: 0.9em;
+	background-color: #eaeaea;
 }
 
 /* Buttons */
@@ -216,7 +216,7 @@ body { padding: 210px 0 120px; }
 }
 /* Small devices (tablets, 768px and up) */
 @media (min-width: 768px) and (max-width: 991px) {
-	body { padding: 175px 0 120px; }
+	body { padding: 175px 0 85px; }
 	#pre-navbar { top: 135px; }
 	.dossier-circles { height: 130px; }
 }
