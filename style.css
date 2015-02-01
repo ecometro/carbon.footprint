@@ -27,7 +27,9 @@ body { padding: 210px 0 85px; }
 	background-color: #fff;
 	padding-bottom: 45px;
 }
-
+#page-content {
+	font-size: 0.9em;
+}
 
 /* header */
 #top-navbar {

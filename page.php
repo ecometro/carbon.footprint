@@ -8,7 +8,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 </header>
 
 <main class="row" role="main">
-	<section class="col-md-12">
+	<section id="page-content" class="col-md-12">
 		<?php the_content(); ?>
 	</section>
 </main>
