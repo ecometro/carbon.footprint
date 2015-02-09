@@ -51,15 +51,18 @@ body { padding: 210px 0 85px; }
 	padding-top: 10px;
 }
 #pre .carousel-indicators {
-	bottom: -5px;
-	text-align: left;
+	bottom: -10px;
+	right: 1%;
+	left: auto;
+	text-align: right;
 }
 #pre .carousel-caption {
 	right: auto;
+	bottom: 3px;
 	max-width: 720px;
 	text-align: left;
-	padding-bottom: 10px;
-	font-size: 0.9em;
+	padding-bottom: 0px;
+	font-size: 0.8em;
 }
 #pre-navbar {
 	top: 170px;

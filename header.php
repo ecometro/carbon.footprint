@@ -101,11 +101,12 @@ wp_head(); ?>
 
 <?php
 $interviews = array(
-	array('María Jesús González','Dra. Arquitecta, presidenta de Agrupación de Arquitectos por la Sostenibilidad','m.jesus'),
-	array('Javier Serra María-Tomé','Arquitecto por la UPM y funcionario de carrera del Cuerpo de Arquitectos del Estado','serra'),
-	array('Cecilia Alcalá','Bióloga y PDD en el IESE','cecilia'),
-	array('Jesús Abadía','Licenciado en Ciencias Químicas, diplomado en Ingeniería Ambiental en la EOI, MBA en el IE','abadia'),
-	array('Javier Serra María-Tomé','Arquitecto por la UPM y funcionario de carrera del Cuerpo de Arquitectos del Estado','serra.b')
+		array('María Jesús González','La fase de proyecto es fundamental en todo el proceso de la edificación y también en lo referido a emisiones, bien se trate de las relacionadas con la fase de construcción como de las demás. La <strong>arquitectura</strong> es ante todo una idea; de los criterios con los que sea gestada dependerá todo el proceso posterior.','m.jesus'),
+	array('Javier Serra María-Tomé','En primer lugar <strong>tenemos que tomar conciencia</strong> nosotros mismos a través de la información y formación, para luego transmitirla a nuestros clientes, los promotores, y al resto de los agentes del proceso edificatorio. <strong>Hay que llevar este espíritu hasta la obra aunque sea lento y difícil.</strong>','serra'),
+	array('Cecilia Alcalá','Sin información no podemos tomar decisiones, pero si medimos y comunicamos, <strong>con este conocimiento podemos todos contribuir a soluciones tecnológicas más ambientales</strong>. Si cada uno ponemos nuestro "granito de arena", podemos aportar en cada etapa de la construcción del edificio a la mejora de la huella del mismo.','cecilia'),
+	array('Jesús Abadía','Creo que el papel de comunicar la información ambiental ha de ser, para los arquitectos, <strong>tan importante como hablar de los requisitos normativos, el diseño o la funcionalidad</strong> de la construcción.','abadia'),
+	array('Javier Serra María-Tomé','<strong>Hemos estado ciegos ante estas emisiones</strong>, tanto por desconocer y ser insensibles a sus rangos y efectos, como por falta de herramientas asequibles que faciliten su estimación. La existencia de herramientas sencillas ha de permitir tomar decisiones acertadas, sobre todo a largo plazo, entendiendo que los edificios tienen una vida útil bastante más larga que otros bienes.','serra.b'),
+	array('Teresa Batlle y Felipe Pich-Aguilera','Llegará un día que los edificios podrán ser una de las más importantes soluciones al problema ambiental. La población aumenta..., la habitabilidad mejora..., la ciudad crece..., los edificios deben considerar como prioridad su complicidad con el medio.','batlle')
 );
 $indicators_out = "<ol class='carousel-indicators'>";
 $slides_out = "<div class='carousel-inner' role='listbox'>";
@@ -117,7 +118,7 @@ foreach ( $interviews as $count => $i ) {
 	<div class='item".$active."'>
 		<img src='".HCE_BLOGTHEME."/images/carousel.0".$count.".jpg' alt='".$i[0]."' />
 		<div class='carousel-caption'>
-		<strong>".$i[0]."</strong><br />".$i[1]."<br /><a href='".HCE_BLOGTHEME."/images/carousel.pdf.0".$count.".pdf'>Descargar entrevista PDF</a>
+		<strong>".$i[0]."</strong>: <em>".$i[1]."</em><br /><a href='".HCE_BLOGTHEME."/images/carousel.pdf.0".$count.".pdf'>Descargar entrevista PDF</a>
 		</div>
 	</div>
 	";
