@@ -26,6 +26,7 @@ body { padding: 210px 0 85px; }
 #content {
 	background-color: #fff;
 	padding-bottom: 45px;
+	min-height: 450px;
 }
 #page-content {
 	font-size: 0.9em;
@@ -210,6 +211,7 @@ body { padding: 210px 0 85px; }
 /* Smallest devices (mobiles, px and up) */
 @media (max-width: 767px) {
 	body { padding: 60px 0 30px; }
+	#content { min-height: auto; }
 	#top-navbar .container, #pre-navbar .container, #epi .container { padding-bottom: 6px;}
 	#pre { position: static; }
 	#pre-navbar { top: 33px; padding: 0; }
