@@ -21,6 +21,9 @@ Tags: HTML5, CSS3
 .aligncenter {
 	text-align: center;
 }
+#content h2 {
+	margin-top: 40px;
+}
 
 body { padding: 210px 0 85px; }
 #content {
@@ -59,7 +62,7 @@ body { padding: 210px 0 85px; }
 #pre .carousel-caption {
 	right: auto;
 	bottom: 3px;
-	max-width: 720px;
+	max-width: 400px;
 	text-align: left;
 	padding-bottom: 0px;
 	font-size: 0.8em;
