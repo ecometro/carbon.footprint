@@ -944,7 +944,7 @@ function hce_project_calculate_emissions($project_id,$emission_type) {
 			if ( !array_key_exists($material['component_1'],$weight) ) {
 				$weight[$material['component_1']] = $material['material_amount'] * $material['component_1_mass'];
 			} else {
-				$weight[$material['component_1']] += $material['material_amount'] * $material['material_mass'];
+				$weight[$material['component_1']] += $material['material_amount'] * $material['component_1_mass'];
 			}
 			
 		} elseif ( $emission_type == 'transport' ) { // if transport emissions
