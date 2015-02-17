@@ -1709,7 +1709,7 @@ function hce_form() {
 			<div class='form-horizontal col-sm-12'>
 			".$fields_out."
 			<fieldset class='form-group'>
-				<div class='col-sm-offset-3 col-sm-5'>
+				<div class='col-sm-offset-3 col-sm-9'>
 					".$prev_step_out."
 					<div class='pull-right'>".$next_step_out."</div>
 	    			</div>
