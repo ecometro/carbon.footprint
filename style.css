@@ -29,7 +29,6 @@ body { padding: 210px 0 85px; }
 #content {
 	background-color: #fff;
 	padding-bottom: 45px;
-	min-height: 450px;
 }
 #page-content {
 	font-size: 0.9em;
@@ -235,10 +234,12 @@ body { padding: 210px 0 85px; }
 /* Medium devices (desktops, 992px and up) */
 @media (min-width: 992px) and (max-width: 1199px) {
 	.dossier-circles { height: 170px; }
+	#content { min-height: 450px; }
 }
 /* Large devices (large desktops, 1200px and up) */
 @media (min-width: 1200px) {
 	.dossier-circles { height: 200px; }
+	#content { min-height: 630px; }
 }
 
 /* dossier print styles */
