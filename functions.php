@@ -245,23 +245,20 @@ CLAÚSULA INFORMATIVA DE REGISTRO DE NUEVO USUARIO:
 
 De acuerdo con lo dispuesto en el artículo 5 de la Ley Orgánica 15/1999, de 13 de diciembre, de protección de datos de carácter personal (LOPD) el solicitante queda informado de:
 
-1.- Sus datos personales se incorporarán a los ficheros de datos personales cuya titularidad ostenta ECÓMETRO. ASOCIACIÓN PARA LA MEDICIÓN Y DIFUSIÓN DE LA ECOLOGÍA EN LA ARQUITECTURA, con domicilio social en la calle Villanueva 35 de Madrid.
+1.- Sus datos personales se incorporarán a los ficheros de datos personales cuya titularidad ostenta ASA. ASOCIACIÓN SOSTENIBILIDAD Y ARQUITECTURA, con domicilio social en el Pº de la Castellana, 12. Madrid 28046.
 
 2.- Las finalidades de los tratamientos de los datos personales serán:
 
-    El examen de su solicitud como asociado y estimar su ingreso en la Asociación.
-    Gestión de las actividades de la Asociación y de sus órganos de representación.
-    Gestión de las relaciones jurídico-económicas entre la Asociación y sus asociados.
-    Gestión y organización de las actividades de todo tipo que se desarrollen para el cumplimiento de los fines de la Asociación.
-    La ejecución de los Estatutos de la Asociación, que el solicitante declara conocer y aceptar.
-
+    Gestión de la información generada para creación de estadísticas y conclusiones en relación a materiales más empleados y carga medioambiental de los mismos en los proyectos y obras en la edificación. 
+    Gestión de la información relacionada con la Huella de Carbono en la edificación para la mejora o modificación de los documentos de apoyo.
+    Gestión y organización de las actividades de difusión y formación que se desarrollen en torno a los indicadores ambientales, cambio climático, sostenibilidad y arquitectura.
+    
 3.- Las cesiones de datos que se efectuarán serán las siguientes:
 
-    A la entidad bancaria en la que la Asociación disponga de la cuenta corriente para la domiciliación del pago de la cuota de asociado.
-    Las que resulten de la ejecución de los Estatutos de la Asociación que el solicitante declara conocer y aceptar.
+    Las que resulten de la ejecución de las finalidades del tratamiento de los datos, que el solicitante declara conocer y aceptar.
     Las que se realicen bajo los supuestos previstos en el artículo 11 de la LOPD.
 
-4.- Ejercicio de derechos de acceso, rectificación, cancelación y oposición: los interesados podrán ejercitar estos derechos en los términos recogidos en la LOPD y normativa de desarrollo, dirigiéndose a la Secretaría de la Asociación en su domicilio (calle Veneras 9 / 28013 Madrid).
+4.- Ejercicio de derechos de acceso, rectificación, cancelación y oposición: los interesados podrán ejercitar estos derechos en los términos recogidos en la LOPD y normativa de desarrollo, dirigiéndose a la Secretaría de la Asociación en su domicilio (Pº Castellana, 12 / 28046 Madrid).
 </textarea>
 			</div>
 		</fieldset>
