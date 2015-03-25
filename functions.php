@@ -584,7 +584,7 @@ function hce_project_insert_basic_data() {
 			wp_redirect($location);
 			exit;
 		}
-		$req_cfields = array("built-area","useful-area","adjusted-area","users","budget");
+		$req_cfields = array("built-area","useful-area","users","budget","energy-label");
 		foreach ( $req_cfields as $req_cfield ) {
 			$field = sanitize_text_field($_POST[$field_prefix.$req_cfield]);
 			if ( $field == '' ) { // if any custom field is empty
@@ -596,7 +596,7 @@ function hce_project_insert_basic_data() {
 		// end check if required fields exist
 
 		// no required fields
-		$notreq_cfields = array("address","city","state","cp","use","energy-label","energy-consumption","co2-emission");
+		$notreq_cfields = array("address","city","state","cp","use","adjusted-area","energy-consumption","co2-emission");
 		foreach ( $notreq_cfields as $notreq_cfield ) {
 			$field = sanitize_text_field($_POST[$field_prefix.$notreq_cfield]);
 			if ( $field != '' ) { $cfields[$cfield_prefix.$notreq_cfield] = $field; }
@@ -1438,7 +1438,7 @@ function hce_form() {
 			array(
 				'label' => 'Superficie computable',
 				'name' => 'adjusted-area',
-				'required' => 1,
+				'required' => 0,
 				'unit' => 'm2',
 				'comment' => '',
 				'value' => $value['adjusted-area']
@@ -1462,7 +1462,7 @@ function hce_form() {
 			array(
 				'label' => 'Calificación energética',
 				'name' => 'energy-label',
-				'required' => 0,
+				'required' => 1,
 				'unit' => '',
 				'comment' => '',
 				'value' => $value['energy-label']
