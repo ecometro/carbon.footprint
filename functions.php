@@ -266,7 +266,7 @@ De acuerdo con lo dispuesto en el artículo 5 de la Ley Orgánica 15/1999, de 13
 			<div class='col-sm-offset-3 col-sm-5'>
 				<label for='user_accept'>
 					<input name='user_accept' id='user_accept' type='checkbox' value='Acepto' />
-					Acepto las condiciones legales.
+					He leído y acepto estas condiciones legales y la <a href='/politica-privacidad' target='_blank'>Política de privacidad</a>
 				</label>
 				<div class='pull-right'>
 					<input id='wp-submit' class='btn btn-success' type='submit' value='Regístrate' name='wp-submit' />
