@@ -1377,7 +1377,8 @@ function hce_form() {
 				'required' => 1,
 				'unit' => '',
 				'comment' => '<span class="glyphicon glyphicon-asterisk"></span> Campos requeridos.',
-				'value' => $value['name']
+				'value' => $value['name'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Calle',
@@ -1385,7 +1386,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['address']
+				'value' => $value['address'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Localidad',
@@ -1393,7 +1395,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['city']
+				'value' => $value['city'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Provincia',
@@ -1401,7 +1404,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['state']
+				'value' => $value['state'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Código postal',
@@ -1409,7 +1413,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['cp']
+				'value' => $value['cp'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Uso',
@@ -1417,7 +1422,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['use']
+				'value' => $value['use'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Superficie construida',
@@ -1425,7 +1431,8 @@ function hce_form() {
 				'required' => 1,
 				'unit' => 'm2',
 				'comment' => '',
-				'value' => $value['built-area']
+				'value' => $value['built-area'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Superficie útil',
@@ -1433,7 +1440,8 @@ function hce_form() {
 				'required' => 1,
 				'unit' => 'm2',
 				'comment' => '',
-				'value' => $value['useful-area']
+				'value' => $value['useful-area'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Superficie computable',
@@ -1441,7 +1449,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => 'm2',
 				'comment' => '',
-				'value' => $value['adjusted-area']
+				'value' => $value['adjusted-area'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Número de usuarios',
@@ -1449,7 +1458,8 @@ function hce_form() {
 				'required' => 1,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['users']
+				'value' => $value['users'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Presupuesto',
@@ -1457,7 +1467,8 @@ function hce_form() {
 				'required' => 1,
 				'unit' => '€',
 				'comment' => '',
-				'value' => $value['budget']
+				'value' => $value['budget'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Calificación energética',
@@ -1465,7 +1476,9 @@ function hce_form() {
 				'required' => 1,
 				'unit' => '',
 				'comment' => '',
-				'value' => $value['energy-label']
+				'value' => $value['energy-label'],
+				'type' => 'select',
+				'options' => array('A','B','C','D','E')
 			),
 			array(
 				'label' => 'Consumo energético anual',
@@ -1473,7 +1486,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => 'kWh/m2 año',
 				'comment' => '',
-				'value' => $value['energy-consumption']
+				'value' => $value['energy-consumption'],
+				'type' => 'text'
 			),
 			array(
 				'label' => 'Emisión anual de CO2',
@@ -1481,7 +1495,8 @@ function hce_form() {
 				'required' => 0,
 				'unit' => 'Kg CO2/m2 año',
 				'comment' => '',
-				'value' => $value['co2-emission']
+				'value' => $value['co2-emission'],
+				'type' => 'text'
 			),
 		);
 	
@@ -1495,16 +1510,39 @@ function hce_form() {
 			if ( $field['comment'] != '' ) {
 	    			$help = "<p class='help-block col-sm-4'><small>".$field['comment']."</small></p>";
 			} else { $help = ""; }
-			$fields_out .= "
-			<fieldset class='form-group".$feedback_class."'>
-				<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label'].$req_class."</label>
-				<div class='col-sm-5'>
-					<input class='form-control' type='text' value='".$field['value']."' name='hce-form-step".$step."-".$field['name']."' />
-					".$feedback."
-				</div>
-				".$help."
-			</fieldset>
-			";
+			if ( $field['type'] == 'select' ) {
+				$fields_out .= "
+				<fieldset class='form-group".$feedback_class."'>
+					<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label'].$req_class."</label>
+					<div class='col-sm-5'>
+						<select class='form-control' name='hce-form-step".$step."-".$field['name']."'>
+							<option value=''></option>
+				";
+				foreach ( $field['options'] as $o ) {
+					if ( $o == $field['value'] ) { $selected = " selected"; }
+					else { $selected = ""; }
+					$fields_out .= "<option value='".$o."'".$selected.">".$o."</option>";
+				}
+
+				$fields_out .="
+						</select>
+						".$feedback."
+					</div>
+					".$help."
+				</fieldset>
+				";
+			} else {
+				$fields_out .= "
+				<fieldset class='form-group".$feedback_class."'>
+					<label for='hce-form-step".$step."-".$field['name']."' class='col-sm-3 control-label'>".$field['label'].$req_class."</label>
+					<div class='col-sm-5'>
+						<input class='form-control' type='text' value='".$field['value']."' name='hce-form-step".$step."-".$field['name']."' />
+						".$feedback."
+					</div>
+					".$help."
+				</fieldset>
+				";
+			}
 		}
 		$fields_out .= "
 		<fieldset class='form-group'>
