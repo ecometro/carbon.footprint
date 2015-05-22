@@ -215,18 +215,24 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 		if ( $c_media >= $c_project ) { $c_project_zindex = 4; }
 		$c_project_margin = ( 100 - $c_project ) / 2;
 		$c_media_margin = ( 100 - $c_media ) / 2;
+//		$circles_out .= "
+//		<div class='col-sm-3 col-xs-6'>
+//			<div class='dossier-circle-pre'><strong><small>Por ".$c[2]."</small></strong></div>
+//			<div class='dossier-circles'>
+//				<div class='dossier-circle dossier-circle-media' style='width: ".$c_media."%; margin-top: ".$c_media_margin."%; z-index: ".$c_media_zindex.";'>
+//					<div class='dossier-circle-label bg-default'>".$c[1]."</div>
+//				</div>
+//				<div class='dossier-circle dossier-circle-project' style='width: ".$c_project."%; margin-top: ".$c_project_margin."%; z-index: ".$c_project_zindex.";'>
+//					<div class='dossier-circle-label bg-primary'>".$c[0]."</div>
+//				</div>
+//			</div>
+//			<div class='dossier-circle-epi'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span> <span class='btn btn-default btn-xs' disabled='disabled'>".$c[1]."</span></div>
+//		</div>
+//		";
 		$circles_out .= "
 		<div class='col-sm-3 col-xs-6'>
 			<div class='dossier-circle-pre'><strong><small>Por ".$c[2]."</small></strong></div>
-			<div class='dossier-circles'>
-				<div class='dossier-circle dossier-circle-media' style='width: ".$c_media."%; margin-top: ".$c_media_margin."%; z-index: ".$c_media_zindex.";'>
-					<div class='dossier-circle-label bg-default'>".$c[1]."</div>
-				</div>
-				<div class='dossier-circle dossier-circle-project' style='width: ".$c_project."%; margin-top: ".$c_project_margin."%; z-index: ".$c_project_zindex.";'>
-					<div class='dossier-circle-label bg-primary'>".$c[0]."</div>
-				</div>
-			</div>
-			<div class='dossier-circle-epi'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span> <span class='btn btn-default btn-xs' disabled='disabled'>".$c[1]."</span></div>
+			<div class='dossier-circle-epi'><span class='btn btn-primary btn-xs' disabled='disabled'>" .$c[0]. "</span></div>
 		</div>
 		";
 	}
@@ -264,7 +270,7 @@ if ( have_posts() ) { while ( have_posts() ) : the_post();
 			<div class='dossier-table-header row'>
 				<div class='col-sm-12'>
 					<div><strong>RELATIVAS</strong></div>	
-					<small>en kg CO<sub>2</sub> eq</small> <span class='btn btn-primary btn-xs' disabled='disabled'>Proyecto actual</span> <span class='btn btn-default btn-xs' disabled='disabled'>Media <?php echo $projects_count ?> proyectos evaluados</span>
+					<small>en kg CO<sub>2</sub> eq</small>
 				</div>
 			</div>
 			<div class='row'>
