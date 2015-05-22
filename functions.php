@@ -2003,7 +2003,7 @@ function hce_filter_loops( $query ) {
 		$query->set('post_type',array('project')); 
 		global $current_user;
 		get_currentuserinfo();
-		if ( is_author() && is_user_logged_in() && $current_user->user_login == $query->query_vars['author_name'] ) {
+		if ( is_author() && is_user_logged_in() && $current_user->user_nicename == $query->query_vars['author_name'] ) {
 			$query->set( 'post_status','any' );
 		} else { $query->set( 'post_status','publish' ); }
 
