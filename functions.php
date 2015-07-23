@@ -1208,7 +1208,8 @@ function hce_project_emission_transport() {
 		$fields_to_save = array('distance','type');
 		foreach ( $fields_to_save as $field ) {
 			$save_count = 1;
-			while ( $save_count <= 10 ) {
+			$save_max = sanitize_text_field($_POST['hce-form-step3-transport-to-save']);
+			while ( $save_count <= $save_max ) {
 				$value = sanitize_text_field($_POST['hce-form-step3-transport-'.$field."-".$save_count]);
 				if ( $value == '' ) {
 					$location .= "?step=3&project_id=".$project_id."&feedback=required_field";
@@ -1666,6 +1667,7 @@ function hce_form() {
 			</fieldset>
 			";
 		}
+		$fields_out .= "<input type='hidden' name='hce-form-step".$step."-transport-to-save' value='".$tt_count."' />";
 	}
 	// in step 4
 	elseif ( $step == 4 ) {
